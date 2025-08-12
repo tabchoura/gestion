@@ -1,0 +1,90 @@
+<header class="header">
+  <div class="container header-inner">
+    <div class="brand" (click)="scrollTo('accueil')">Gestion des Chéquiers</div>
+    <nav class="nav">
+      <a (click)="scrollTo('accueil')">Accueil</a>
+      <a (click)="scrollTo('about')">Qui nous sommes</a>
+      <a (click)="scrollTo('services')">Nos services</a>
+      <a (click)="scrollTo('avis')">Avis</a>
+      <a (click)="scrollTo('contact')">Contact</a>
+<a routerLink="/login">Se connecter</a>
+    </nav>
+  </div>
+</header>
+
+<section id="accueil" class="hero">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <h1>Demandez et suivez votre chéquier en ligne</h1>
+      <p>Une plateforme simple, rapide et sécurisée.</p>
+      <div class="hero-actions">
+<a routerLink="/login" class="btn btn-primary">Commencer par ici</a>
+        <button class="btn btn-ghost" (click)="scrollTo('services')">Voir les services</button>
+      </div>
+      <div class="hero-badges"><span>⚡ Rapide</span><span>🔒 Sécurisé</span><span>💬 Support</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="section">
+  <div class="container grid-2">
+    <div>
+      <h2>Qui nous sommes</h2>
+      <p>Expérience 100% en ligne pour vos chéquiers : demande, suivi, historique.</p>
+      <ul class="list-check">
+        <li>Processus fluide</li><li>Suivi en temps réel</li><li>Historique centralisé</li>
+      </ul>
+    </div>
+    <div class="card glass">
+      <h3>Pourquoi nous choisir ?</h3>
+      <ul><li>Pas d’attente</li><li>Transparence</li><li>Sécurité</li></ul>
+    </div>
+  </div>
+</section>
+
+<section id="services" class="section alt">
+  <div class="container">
+    <h2 class="center">Nos services</h2>
+    <div class="cards">
+      <div class="card" *ngFor="let s of services">
+        <div class="icon">{{ s.icon }}</div>
+        <h3>{{ s.title }}</h3>
+        <p class="muted">{{ s.desc }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="avis" class="section">
+  <div class="container">
+    <h2 class="center">Ils nous font confiance</h2>
+    <div class="testimonials">
+      <div class="tcard" *ngFor="let a of avis">
+        <div class="stars">
+          <span *ngFor="let _ of [1,2,3,4,5]; let i = index">{{ i < a.note ? '★' : '☆' }}</span>
+        </div>
+        <p class="quote">“{{ a.text }}”</p>
+        <div class="author">— {{ a.name }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="section alt">
+  <div class="container grid-2">
+    <div>
+      <h2>Contact</h2>
+      <p class="muted">support@banque.tn — +216 71 000 000</p>
+    </div>
+    <!-- <div class="card">
+      <h3>Commencer maintenant</h3>
+<a routerLink="/register" class="btn btn-primary">Commencer par ici</a>
+    </div> -->
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <!-- <span class="muted">© {{ currentYear }} Gestion des Chéquiers</span> -->
+  </div>
+</footer>

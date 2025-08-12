@@ -1,0 +1,18 @@
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="brand">👤 Espace Client</div>
+    <nav class="menu">
+      <a routerLink="profile" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Profil</a>
+            <a routerLink="comptes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Mes Comptes bancaires</a>
+
+      <a routerLink="demandes" routerLinkActive="active">Demandes</a>
+      <a routerLink="historiques" routerLinkActive="active">Historiques</a>
+    </nav>
+        <button class="logout-btn" (click)="logout()">🚪 Déconnexion</button>
+
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

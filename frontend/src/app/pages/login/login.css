@@ -1,0 +1,10 @@
+.wrap{max-width:420px;margin:48px auto;padding:24px;background:#fff;border:1px solid #eee;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+h2{margin:0 0 6px}
+.subtitle{margin:0 0 16px;color:#666}
+.field{display:grid;gap:6px;margin-bottom:12px}
+.field input{padding:10px;border:1px solid #ddd;border-radius:10px}
+.checkbox{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid #ddd;background:#ef4444;color:#fff;cursor:pointer}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.server-error{color:#b00020;margin-bottom:10px}
+.muted{color:#666;margin-top:12px}
