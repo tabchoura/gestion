@@ -2,7 +2,11 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: './pages/acceuil/acceuil' },
+  // Accueil par défaut
+  { path: '', loadComponent: () => import('./pages/acceuil/acceuil').then(m => m.AccueilComponent) },
+
+  // (facultatif) URL explicite /acceuil
+  { path: 'acceuil', loadComponent: () => import('./pages/acceuil/acceuil').then(m => m.AccueilComponent) },
 
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./pages/register/register').then(m => m.RegisterComponent) },
@@ -17,5 +21,5 @@ export const routes: Routes = [
     ]
   },
 
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: '' } // retombe sur l’accueil
 ];
