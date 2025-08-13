@@ -1,0 +1,8 @@
+.header { display:flex; justify-content:space-between; align-items:center; }
+.table table { width:100%; border-collapse: collapse; }
+.table th, .table td { padding: 8px 10px; border-bottom: 1px solid #eee; text-align:left; }
+.mini { font-size: 12px; padding: 4px 8px; }
+.payload pre { background:#0b1022; color:#e5f0ff; padding:12px; border-radius:8px; overflow:auto; }
+.card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.06); margin-bottom:12px; }
+.title { font-weight:600; display:flex; gap:8px; align-items:center; }
+.btn.light { background:#f5f6fb; border:1px solid #e5e7ef; }

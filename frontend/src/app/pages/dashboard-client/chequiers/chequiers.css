@@ -1,0 +1,8 @@
+.wrap { max-width: 900px; margin: 16px auto; }
+.back { display:inline-block; margin: 8px 0 16px; text-decoration:none; }
+.muted { color: #6b7280; }
+.error { color: #b91c1c; }
+.pad { padding: 8px 0; }
+.list { display: grid; gap: 12px; }
+.item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; background: #fff; }
+.line { margin: 4px 0; }

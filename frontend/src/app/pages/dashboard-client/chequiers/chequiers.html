@@ -1,0 +1,18 @@
+<div class="wrap">
+  <h2>📔 Chéquiers du compte #{{ compteId }}</h2>
+
+  <a routerLink="/dashboardclient" class="back">← Retour</a>
+
+  <div *ngIf="loading" class="muted pad">Chargement…</div>
+  <div *ngIf="error" class="error pad">{{ error }}</div>
+  <div *ngIf="!loading && !error && chequiers.length === 0" class="muted pad">Aucun chéquier.</div>
+
+  <div class="list" *ngIf="chequiers.length">
+    <div class="item" *ngFor="let ch of chequiers">
+      <div class="line"><b>Émis le :</b> {{ ch.dateEmission | date:'dd/MM/yyyy' }}</div>
+      <div class="line"><b>Plage :</b> {{ ch.premierNumeroCheque }} → {{ ch.dernierNumeroCheque }}</div>
+      <div class="line"><b>Nombre de pages :</b> {{ ch.nbPages }}</div>
+      <div class="line" *ngIf="ch.statut"><b>Statut :</b> {{ ch.statut }}</div>
+    </div>
+  </div>
+</div>

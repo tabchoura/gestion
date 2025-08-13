@@ -1,0 +1,58 @@
+<div class="card header">
+  <div class="title">
+    <i class="ri-time-line"></i>
+    <ng-container [ngSwitch]="mode()">
+      <span *ngSwitchCase="'me'">Mon Historique</span>
+      <span *ngSwitchCase="'type'">Historique — {{ currentType() }}</span>
+      <span *ngSwitchCase="'resource'">Historique — {{ currentType() }} #{{ currentId() }}</span>
+    </ng-container>
+  </div>
+
+  <button class="btn light" (click)="back()">
+    <i class="ri-arrow-left-line"></i> Retour
+  </button>
+</div>
+
+<div class="card" *ngIf="error()">{{ error() }}</div>
+
+<div class="card" *ngIf="loading()">Chargement…</div>
+
+<div class="card" *ngIf="!loading() && items().length === 0">
+  Aucun événement.
+</div>
+
+<div class="card table" *ngIf="!loading() && items().length">
+  <table>
+    <thead>
+      <tr>
+        <th>Quand</th>
+        <th>Action</th>
+        <th>Type</th>
+        <th>Ressource</th>
+        <th>Message</th>
+        <th>Détails</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let it of items()">
+        <td>{{ it.creeLe | date:'short' }}</td>
+        <td>{{ it.action }}</td>
+        <td>{{ it.ressourceType }}</td>
+        <td>
+          <span *ngIf="it.ressourceId">#{{ it.ressourceId }}</span>
+          <span *ngIf="it.ressourceLabel"> — {{ it.ressourceLabel }}</span>
+        </td>
+        <td>{{ it.message || '—' }}</td>
+        <td>
+          <button class="mini" (click)="toggleRow(it.id)" *ngIf="it.payloadJson">Voir</button>
+        </td>
+      </tr>
+      <tr class="payload" *ngFor="let it of items()"
+          [hidden]="!isExpanded(it.id)">
+        <td colspan="6">
+          <pre>{{ it.payloadJson }}</pre>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

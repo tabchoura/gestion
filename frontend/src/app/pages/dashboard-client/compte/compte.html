@@ -1,0 +1,64 @@
+<div class="wrap">
+  <h2>💳 Mes Comptes Bancaires</h2>
+
+  <div class="card">
+    <div class="table">
+      <!-- Entête -->
+      <div class="thead">
+        <div>Banque</div>
+        <div>Titulaire</div>
+        <div>N° Compte</div>
+        <div>RIB</div>
+        <div class="thead-actions">
+          Actions
+          <button class="btn-add" (click)="startAdd()" title="Ajouter un compte">➕ Ajouter</button>
+        </div>
+      </div>
+
+      <!-- Formulaire inline ajout/édition -->
+      <form *ngIf="isAdding() || isEditing()" [formGroup]="form" (ngSubmit)="submit()" class="inline-form">
+        <input formControlName="banque" placeholder="Banque *" />
+        <input formControlName="titulaire" placeholder="Titulaire *" />
+        <input formControlName="numeroCompte" placeholder="N° Compte *" />
+        <input formControlName="rib" maxlength="20" placeholder="RIB (20 chiffres, optionnel)" />
+        <div class="inline-actions">
+          <select formControlName="devise">
+            <option *ngFor="let d of devises" [value]="d">{{ d }}</option>
+          </select>
+
+          <button type="submit" [disabled]="form.invalid || savingFn()">
+            {{ isEditing() ? 'Enregistrer' : 'Ajouter' }}
+          </button>
+
+          <button type="button" class="ghost" (click)="isEditing() ? cancelEdit() : cancelAdd()">
+            Annuler
+          </button>
+        </div>
+      </form>
+
+      <!-- Lignes -->
+      <div class="rowitem" *ngFor="let c of comptesFn()">
+        <div><b>{{ c.banque }}</b> <span class="muted" *ngIf="c.devise">· {{ c.devise }}</span></div>
+        <div>{{ c.titulaire }}</div>
+        <div>{{ c.numeroCompte }}</div>
+        <div>{{ formatRib(c.rib) }}</div>
+        <div class="rowactions">
+          <!-- 🔥 Bouton qui navigue vers /dashboardclient/demandes/:id -->
+          <button type="button"
+                  class="mini"
+                  (click)="voirChequier(c, $event)"
+                  title="Voir chéquier">
+            Voir chéquier
+          </button>
+
+          <button class="mini warn" (click)="startEdit(c)" title="Modifier">Éditer</button>
+          <button class="mini danger" (click)="delete(c)" title="Supprimer">Supprimer</button>
+        </div>
+      </div>
+
+      <!-- États -->
+      <div *ngIf="!loadingFn() && comptesFn().length === 0" class="muted pad">Aucun compte.</div>
+      <div *ngIf="loadingFn()" class="muted pad">Chargement…</div>
+    </div>
+  </div>
+</div>
