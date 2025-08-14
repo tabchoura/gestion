@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 export type RessourceType =
   | 'COMPTE' | 'DEMANDE_CHEQUIER' | 'CHEQUIER' | 'CHEQUE' | 'AUTH' | 'AUTRE';
@@ -18,24 +19,49 @@ export interface HistoriqueItem {
   action: ActionType;
   message?: string | null;
   payloadJson?: string | null;
-  creeLe: string; // ISO
+  creeLe: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class HistoriqueService {
   private http = inject(HttpClient);
-  // ⛳️ URL RELATIVE -> l’interceptor ajoute toujours Authorization
   private base = `/api/historique`;
 
+  private parseList(txt: string): HistoriqueItem[] {
+    if (!txt) return [];                 // body vide => []
+    const s = txt.trim();
+    if (s.startsWith('<')) return [];    // HTML (ex: redirection vers login) => []
+    try { return JSON.parse(s) as HistoriqueItem[]; }
+    catch { return []; }
+  }
+
   listMy(): Observable<HistoriqueItem[]> {
-    return this.http.get<HistoriqueItem[]>(this.base);
+    return this.http.get(this.base, { responseType: 'text' as const }).pipe(
+      map(t => this.parseList(t)),
+      catchError(() => of([]))
+    );
   }
 
   listByResource(type: RessourceType, id: number): Observable<HistoriqueItem[]> {
-    return this.http.get<HistoriqueItem[]>(`${this.base}/resource`, { params: { type, id } as any });
+    return this.http.get(`${this.base}/resource`, {
+      responseType: 'text' as const, params: { type, id } as any
+    }).pipe(
+      map(t => this.parseList(t)),
+      catchError(() => of([]))
+    );
   }
 
   listByType(type: RessourceType): Observable<HistoriqueItem[]> {
-    return this.http.get<HistoriqueItem[]>(`${this.base}/type/${type}`);
+    return this.http.get(`${this.base}/type/${type}`, {
+      responseType: 'text' as const
+    }).pipe(
+      map(t => this.parseList(t)),
+      catchError(() => of([]))
+    );
   }
+  addTest() {
+  // URL relative => l’interceptor mettra le Bearer automatiquement
+  return this.http.post('/api/historique/test', {});
+}
+
 }

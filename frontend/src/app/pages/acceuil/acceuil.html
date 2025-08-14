@@ -1,90 +1,179 @@
-<header class="header">
-  <div class="container header-inner">
-    <div class="brand" (click)="scrollTo('accueil')">Gestion des Chéquiers</div>
-    <nav class="nav">
-      <a (click)="scrollTo('accueil')">Accueil</a>
-      <a (click)="scrollTo('about')">Qui nous sommes</a>
-      <a (click)="scrollTo('services')">Nos services</a>
-      <a (click)="scrollTo('avis')">Avis</a>
-      <a (click)="scrollTo('contact')">Contact</a>
-<a routerLink="/login">Se connecter</a>
-    </nav>
-  </div>
-</header>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Chéquiers - Banque Numérique</title>
+    <meta name="description" content="Demandez et suivez votre chéquier en ligne - Simple, rapide, sécurisé">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
 
-<section id="accueil" class="hero">
-  <div class="container hero-inner">
-    <div class="hero-text">
-      <h1>Demandez et suivez votre chéquier en ligne</h1>
-      <p>Une plateforme simple, rapide et sécurisée.</p>
-      <div class="hero-actions">
-<a routerLink="/login" class="btn btn-primary">Commencer par ici</a>
-        <button class="btn btn-ghost" (click)="scrollTo('services')">Voir les services</button>
-      </div>
-      <div class="hero-badges"><span>⚡ Rapide</span><span>🔒 Sécurisé</span><span>💬 Support</span></div>
-    </div>
-  </div>
-</section>
-
-<section id="about" class="section">
-  <div class="container grid-2">
-    <div>
-      <h2>Qui nous sommes</h2>
-      <p>Expérience 100% en ligne pour vos chéquiers : demande, suivi, historique.</p>
-      <ul class="list-check">
-        <li>Processus fluide</li><li>Suivi en temps réel</li><li>Historique centralisé</li>
-      </ul>
-    </div>
-    <div class="card glass">
-      <h3>Pourquoi nous choisir ?</h3>
-      <ul><li>Pas d’attente</li><li>Transparence</li><li>Sécurité</li></ul>
-    </div>
-  </div>
-</section>
-
-<section id="services" class="section alt">
-  <div class="container">
-    <h2 class="center">Nos services</h2>
-    <div class="cards">
-      <div class="card" *ngFor="let s of services">
-        <div class="icon">{{ s.icon }}</div>
-        <h3>{{ s.title }}</h3>
-        <p class="muted">{{ s.desc }}</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="avis" class="section">
-  <div class="container">
-    <h2 class="center">Ils nous font confiance</h2>
-    <div class="testimonials">
-      <div class="tcard" *ngFor="let a of avis">
-        <div class="stars">
-          <span *ngFor="let _ of [1,2,3,4,5]; let i = index">{{ i < a.note ? '★' : '☆' }}</span>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container header-inner">
+            <div class="brand" (click)="scrollTo('accueil')">
+                <i class="fas fa-university"></i>
+                Gestion des Chéquiers
+            </div>
+            <nav class="nav">
+                <a (click)="scrollTo('accueil')">Accueil</a>
+                <a (click)="scrollTo('about')">Qui nous sommes</a>
+                <a (click)="scrollTo('services')">Nos services</a>
+                <a (click)="scrollTo('avis')">Avis</a>
+                <a (click)="scrollTo('contact')">Contact</a>
+                <a routerLink="/login" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </a>
+            </nav>
         </div>
-        <p class="quote">“{{ a.text }}”</p>
-        <div class="author">— {{ a.name }}</div>
-      </div>
-    </div>
-  </div>
-</section>
+    </header>
 
-<section id="contact" class="section alt">
-  <div class="container grid-2">
-    <div>
-      <h2>Contact</h2>
-      <p class="muted">support@banque.tn — +216 71 000 000</p>
-    </div>
-    <!-- <div class="card">
-      <h3>Commencer maintenant</h3>
-<a routerLink="/register" class="btn btn-primary">Commencer par ici</a>
-    </div> -->
-  </div>
-</section>
+    <!-- HERO SECTION -->
+    <section id="accueil" class="hero">
+        <div class="floating-elements"></div>
+        <div class="container hero-inner">
+            <div class="hero-text">
+                <h1>Demandez et suivez votre chéquier en ligne</h1>
+                <p>Votre chéquier, sans paperasse : simple, rapide, sécurisé.</p>
+                <div class="hero-actions">
+                    <a routerLink="/login" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i> Commencer par ici
+                    </a>
+                    <button class="btn btn-ghost" (click)="scrollTo('services')">
+                        <i class="fas fa-eye"></i> Voir les services
+                    </button>
+                </div>
+                <div class="hero-badges">
+                    <span><i class="fas fa-bolt"></i> Rapide</span>
+                    <span><i class="fas fa-shield-alt"></i> Sécurisé</span>
+                    <span><i class="fas fa-headset"></i> Support</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<footer class="footer">
-  <div class="container footer-inner">
-    <!-- <span class="muted">© {{ currentYear }} Gestion des Chéquiers</span> -->
-  </div>
-</footer>
+    <!-- SECTION QUI NOUS SOMMES -->
+    <section id="about" class="section">
+        <div class="container grid-2">
+            <div>
+                <h2>Qui nous sommes</h2>
+                <p>Nous simplifions la gestion des chéquiers. Plateforme 100% en ligne, nous vous permettons de demander et suivre votre chéquier en quelques clics, avec un parcours clair, des délais raccourcis et une protection stricte des données. Notre promesse : simple pour vous, robuste en coulisses.</p>
+                <ul class="list-check">
+                    <li>Processus fluide</li>
+                    <li>Suivi en temps réel</li>
+                    <li>Historique centralisé</li>
+                </ul>
+            </div>
+            <div class="card glass">
+                <h3>Pourquoi nous faire confiance ?</h3>
+                <ul class="list-check">
+                    <li>
+                        <i class="fas fa-bolt" style="color: #fbbf24;"></i>
+                        <strong>Vitesse :</strong> suivi en temps réel
+                    </li>
+                    <li>
+                        <i class="fas fa-shield-alt" style="color: #10b981;"></i>
+                        <strong>Sécurité :</strong> bonnes pratiques de protection des données
+                    </li>
+                    <li>
+                        <i class="fas fa-search" style="color: #3b82f6;"></i>
+                        <strong>Transparence :</strong> statut clair à chaque étape
+                    </li>
+                   
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION NOS SERVICES -->
+    <section id="services" class="section alt">
+        <div class="container">
+            <h2 class="center">Nos services</h2>
+            <div class="cards">
+                <div class="card" >
+                    <div class="icon">📄</div>
+                    <h3>Demande de chéquier</h3>
+                    <p class="muted">Commandez votre nouveau chéquier en quelques clics. Interface intuitive et processus simplifié.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📍</div>
+                    <h3>Suivi en temps réel</h3>
+                    <p class="muted">Suivez l'état de votre demande à chaque étape : validation, impression, expédition et livraison.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📋</div>
+                    <h3>Historique complet</h3>
+                    <p class="muted">Consultez l'historique de tous vos chéquiers : dates de commande, livraison, utilisation.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔒</div>
+                    <h3>Sécurité renforcée</h3>
+                    <p class="muted">Authentification forte, chiffrement des données et protection contre la fraude.</p>
+                </div>
+               
+                <div class="card">
+                    <div class="icon">🕒</div>
+                    <h3>Service 24/7</h3>
+                    <p class="muted">Plateforme disponible 24h/24, 7j/7 avec support client réactif.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION TÉMOIGNAGES -->
+    <section id="avis" class="section">
+        <div class="container">
+            <h2 class="center">Ils nous font confiance</h2>
+            <div class="testimonials">
+                <div class="tcard" >
+                    <div class="stars">
+                        <span>★★★★★</span>
+                    </div>
+                    <p class="quote">"Service exceptionnel ! J'ai reçu mon chéquier en 48h et le suivi était parfait. Interface très intuitive."</p>
+                    <div class="author">— Sarah Ben Ahmed</div>
+                </div>
+                <div class="tcard">
+                    <div class="stars">
+                        <span>★★★★★</span>
+                    </div>
+                    <p class="quote">"Enfin une banque qui comprend ses clients ! Plus besoin de se déplacer, tout se fait en ligne rapidement."</p>
+                    <div class="author">— Mohamed Trabelsi</div>
+                </div>
+                <div class="tcard">
+                    <div class="stars">
+                        <span>★★★★★</span>
+                    </div>
+                    <p class="quote">"La sécurité et la simplicité réunies. Je recommande vivement cette plateforme à tous mes proches."</p>
+                    <div class="author">— Leila Mansouri</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION CONTACT -->
+    <section id="contact" class="section alt">
+        <div class="container grid-2">
+            <div>
+                <h2><i class="fas fa-envelope"></i> Contact</h2>
+                <p class="muted">
+                    <i class="fas fa-envelope"></i> support@banque.tn<br>
+                    <i class="fas fa-phone"></i> +216 71 000 000
+                </p>
+            </div>
+            <div class="card">
+                <h3>Commencer maintenant</h3>
+                <a routerLink="/register" class="btn btn-primary">Commencer par ici</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <span class="muted">&copy; 2024 Gestion des Chéquiers</span>
+        </div>
+    </footer>
+
+</body>
+</html>

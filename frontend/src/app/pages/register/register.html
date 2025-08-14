@@ -1,37 +1,22 @@
-
-<header class="header">
-  <div class="container header-inner">
-    <div class="brand" routerLink="/">Gestion des Chéquiers</div>
-    <nav class="nav">
-      <a routerLink="/">Accueil</a>
-      <a routerLink="/#about">Qui nous sommes</a>
-      <a routerLink="/#services">Nos services</a>
-      <a routerLink="/#avis">Avis</a>
-      <a routerLink="/#contact">Contact</a>
-      <a routerLink="/login">Se connecter</a>
-    
-    </nav>
-  </div>
-</header>
-      
-<main class="auth-wrapper">
+<main class="auth-wrapper with-header">
   <div class="container">
     <div class="auth-card card glass">
-      <!-- Colonne gauche : Formulaire -->
       <div class="auth-left">
         <h1>Créer un compte</h1>
-        <p class="muted">Inscrivez‑vous en tant que <strong>Client</strong> ou <strong>Agent</strong>.</p>
+        <p class="muted">Inscrivez-vous en tant que <strong>Client</strong> ou <strong>Agent</strong>.</p>
 
-<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <!-- Rôle -->
           <div class="field">
             <span>Je suis</span>
             <div class="roles">
-              <label class="chip">
-                <input type="radio" formControlName="role" value="CLIENT"> Client
+              <label class="chip" [class.selected]="role?.value === 'CLIENT'">
+                <input type="radio" formControlName="role" value="CLIENT" />
+                Client
               </label>
-              <label class="chip">
-                <input type="radio" formControlName="role" value="AGENT"> Agent
+              <label class="chip" [class.selected]="role?.value === 'AGENT'">
+                <input type="radio" formControlName="role" value="AGENT" />
+                Agent
               </label>
             </div>
             <small class="error" *ngIf="role?.touched && role?.invalid">Choisissez un rôle.</small>
@@ -41,7 +26,7 @@
           <label class="field">
             <span>Nom</span>
             <input type="text" formControlName="nom" placeholder="Dupont"
-                   [class.invalid]="nom?.touched && nom?.invalid">
+                   [class.invalid]="nom?.touched && nom?.invalid" />
             <small class="error" *ngIf="nom?.touched && nom?.invalid">Requis (min. 2 caractères).</small>
           </label>
 
@@ -49,70 +34,91 @@
           <label class="field">
             <span>Prénom</span>
             <input type="text" formControlName="prenom" placeholder="Amine"
-                   [class.invalid]="prenom?.touched && prenom?.invalid">
+                   [class.invalid]="prenom?.touched && prenom?.invalid" />
             <small class="error" *ngIf="prenom?.touched && prenom?.invalid">Requis (min. 2 caractères).</small>
           </label>
 
           <!-- Email -->
           <label class="field">
             <span>Email</span>
-            <input type="email" formControlName="email" placeholder="amine.dupont@email.tn"
-                   [class.invalid]="email?.touched && email?.invalid" autocomplete="email">
-            <small class="error" *ngIf="email?.touched && email?.invalid">Email invalide.</small>
+            <input type="email" formControlName="email" autocomplete="email"
+                   placeholder="amine.dupont@email.tn"
+                   [class.invalid]="email?.touched && email?.invalid" />
+            <small class="error" *ngIf="email?.touched && email?.hasError('required')">
+              Email requis.
+            </small>
+            <small class="error" *ngIf="email?.touched && email?.hasError('email')">
+              Format d’adresse email invalide.
+            </small>
           </label>
 
           <!-- Mot de passe -->
           <div class="field">
             <span>Mot de passe</span>
             <div class="password-wrap">
-              <input [type]="hide ? 'password' : 'text'" formControlName="password" placeholder="••••••••"
-                     [class.invalid]="password?.touched && password?.invalid" autocomplete="new-password">
-              <button type="button" class="toggle" (click)="hide = !hide">{{ hide ? '🙈' : '👁️' }}</button>
+              <input [type]="hide ? 'password' : 'text'"
+                     formControlName="password"
+                     placeholder="Mot de passe"
+                     autocomplete="new-password"
+                     [class.invalid]="password?.touched && password?.invalid" />
+              <button type="button" class="toggle"
+                      (click)="hide = !hide"
+                      aria-label="Afficher/Masquer le mot de passe">
+                {{ hide ? '🙈' : '👁️' }}
+              </button>
             </div>
-            <small class="muted">Au moins 6 caractères.</small>
-            <small class="error" *ngIf="password?.touched && password?.invalid">Mot de passe trop court.</small>
+            <small class="muted">Au moins 8 caractères, 1 maj, 1 min, 1 chiffre, 1 spécial.</small>
+            <small class="error" *ngIf="password?.touched && password?.hasError('required')">
+              Mot de passe requis.
+            </small>
+            <small class="error" *ngIf="password?.touched && password?.hasError('minlength')">
+              Au moins 8 caractères.
+            </small>
+            <small class="error" *ngIf="password?.touched && password?.hasError('pattern')">
+              Doit contenir une majuscule, une minuscule, un chiffre et un caractère spécial.
+            </small>
           </div>
 
-          <!-- CGU -->
-          <!-- <div class="row">
-            <label class="checkbox">
-              <input type="checkbox" formControlName="cgu">
-              <span>J’accepte les CGU</span>
-            </label>
-            <a class="link" routerLink="/">Lire les CGU</a>
-          </div> -->
-          <!-- <small class="error" *ngIf="cgu?.touched && cgu?.invalid">Vous devez accepter les CGU.</small> -->
+          <!-- Confirmation mot de passe -->
+          <div class="field">
+            <span>Confirmer le mot de passe</span>
+            <div class="password-wrap">
+              <input
+                [type]="hideConfirm ? 'password' : 'text'"
+                formControlName="confirmPassword"
+                placeholder="Confirmer le mot de passe"
+                [class.invalid]="
+                  (confirmPassword?.touched && confirmPassword?.invalid) ||
+                  (confirmPassword?.touched && form.errors?.['passwordMismatch'])
+                "
+              />
+              <button type="button" class="toggle"
+                      (click)="hideConfirm = !hideConfirm"
+                      aria-label="Afficher/Masquer le mot de passe confirmé">
+                {{ hideConfirm ? '🙈' : '👁️' }}
+              </button>
+            </div>
+            <small class="error" *ngIf="confirmPassword?.touched && confirmPassword?.hasError('required')">
+              Confirmez votre mot de passe.
+            </small>
+            <small class="error" *ngIf="confirmPassword?.touched && form.errors?.['passwordMismatch']">
+              Les mots de passe ne correspondent pas.
+            </small>
+          </div>
 
           <!-- Erreur serveur -->
           <div class="server-error" *ngIf="serverError">{{ serverError }}</div>
 
           <!-- Actions -->
           <button class="btn btn-primary full" type="submit" [disabled]="loading">
-    {{ loading ? 'Création…' : 'Créer un compte' }}
-  </button>
+            {{ loading ? 'Création…' : 'Créer un compte' }}
+          </button>
 
           <p class="muted center small">
-            Déjà inscrit ? <a class="link" routerLink="/login">Se connecter</a>
+            Déjà inscrit ? <a class="link" [routerLink]="['/login']">Se connecter</a>
           </p>
         </form>
       </div>
-
-      <!-- Colonne droite : visuel -->
-      <!-- <div class="auth-right">
-        <div class="hero-badge">📝 Création de compte</div>
-        <h2>Simple, rapide, sécurisé</h2>
-        <ul class="list-check">
-          <li>Inscription en moins de 2 minutes</li>
-          <li>Rôles Client ou Agent</li>
-          <li>Protection des données</li>
-        </ul>
-      </div> -->
     </div>
   </div>
 </main>
-
-<footer class="footer">
-  <div class="container footer-inner">
-    <span class="muted">© {{ year }} Gestion des Chéquiers</span>
-  </div>
-</footer>

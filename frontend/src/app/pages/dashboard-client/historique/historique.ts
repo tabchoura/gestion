@@ -19,20 +19,15 @@ export class HistoriqueComponent implements OnInit {
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
 
-  // Contexte courant
   mode = signal<'me' | 'resource' | 'type'>('me');
   currentType = signal<RessourceType | null>(null);
   currentId = signal<number | null>(null);
 
-  // UI: développements de lignes pour voir le payload
   expanded = new Set<number>();
-  toggleRow(id: number) {
-    this.expanded.has(id) ? this.expanded.delete(id) : this.expanded.add(id);
-  }
+  toggleRow(id: number) { this.expanded.has(id) ? this.expanded.delete(id) : this.expanded.add(id); }
   isExpanded(id: number) { return this.expanded.has(id); }
 
   ngOnInit() {
-    // Route paramétrée /dashboardclient/historique/:type/:id
     this.route.paramMap.subscribe(pm => {
       const type = pm.get('type') as RessourceType | null;
       const id = pm.get('id');
@@ -43,7 +38,6 @@ export class HistoriqueComponent implements OnInit {
         this.loadResource(type, +id);
         return;
       }
-      // Fallback query (?type=...&id=... ou ?type=...)
       const qType = this.route.snapshot.queryParamMap.get('type') as RessourceType | null;
       const qId = this.route.snapshot.queryParamMap.get('id');
       if (qType && qId) {
@@ -59,7 +53,6 @@ export class HistoriqueComponent implements OnInit {
         this.loadByType(qType);
         return;
       }
-      // Mon historique par défaut
       this.mode.set('me');
       this.loadMy();
     });
@@ -68,37 +61,34 @@ export class HistoriqueComponent implements OnInit {
   private loadMy() {
     this.loading.set(true);
     this.api.listMy().subscribe({
-      next: rows => { this.items.set(rows); this.loading.set(false); },
-      error: () => { this.error.set('Impossible de charger votre historique.'); this.loading.set(false); }
+      next: rows => { this.items.set(rows); this.loading.set(false); this.error.set(null); },
+      error: (e) => { this.error.set(`Impossible de charger votre historique (${e.status || '??'}).`); this.loading.set(false); }
     });
   }
 
   private loadResource(type: RessourceType, id: number) {
     this.loading.set(true);
     this.api.listByResource(type, id).subscribe({
-      next: rows => { this.items.set(rows); this.loading.set(false); },
-      error: () => { this.error.set('Impossible de charger l’historique de la ressource.'); this.loading.set(false); }
+      next: rows => { this.items.set(rows); this.loading.set(false); this.error.set(null); },
+      error: (e) => { this.error.set(`Impossible de charger l’historique de la ressource (${e.status || '??'}).`); this.loading.set(false); }
     });
   }
 
   private loadByType(type: RessourceType) {
     this.loading.set(true);
     this.api.listByType(type).subscribe({
-      next: rows => { this.items.set(rows); this.loading.set(false); },
-      error: () => { this.error.set('Impossible de charger l’historique par type.'); this.loading.set(false); }
+      next: rows => { this.items.set(rows); this.loading.set(false); this.error.set(null); },
+      error: (e) => { this.error.set(`Impossible de charger l’historique par type (${e.status || '??'}).`); this.loading.set(false); }
     });
   }
-back(): Promise<boolean> {
-  if (this.mode() === 'resource') {
-    const t = this.currentType();
-    if (t === 'DEMANDE_CHEQUIER') {
-      return this.router.navigate(['/dashboardclient/demandes', this.currentId()]);
-    }
-    if (t === 'COMPTE') {
-      return this.router.navigate(['/dashboardclient/comptes']);
-    }
-  }
-  return this.router.navigate(['/dashboardclient/profile']);
-}
 
+  back(): Promise<boolean> {
+    if (this.mode() === 'resource') {
+      const t = this.currentType();
+      if (t === 'DEMANDE_CHEQUIER') return this.router.navigate(['/dashboardclient/demandes', this.currentId()]);
+      if (t === 'COMPTE')           return this.router.navigate(['/dashboardclient/comptes']);
+    }
+    return this.router.navigate(['/dashboardclient/profile']);
+  }
+  
 }

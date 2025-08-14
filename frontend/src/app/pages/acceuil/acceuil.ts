@@ -26,6 +26,7 @@ export class AccueilComponent {
     { note: 4, text: 'Rapide et efficace', name: 'Sami' },
     { note: 5, text: 'Je recommande', name: 'Amel' }
   ];
+  
 
   go(path: string) {
     this.router.navigateByUrl(path);

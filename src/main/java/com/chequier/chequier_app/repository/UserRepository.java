@@ -1,17 +1,12 @@
 package com.chequier.chequier_app.repository;
 
-import java.util.Optional;
-
+import com.chequier.chequier_app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.chequier.chequier_app.model.User;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email);
-
-    // ✅ pour vérifier l’unicité à l’inscription
-    boolean existsByEmail(String email);
-
-    // ✅ pour vérifier l’unicité lors d’une mise à jour (exclure l’utilisateur courant)
-    boolean existsByEmailAndIdNot(String email, Long id);
+  Optional<User> findByEmail(String email);
+  boolean existsByEmail(String email);                 // ✅ pour AuthController.register()
+  boolean existsByEmailAndIdNot(String email, Long id);
 }

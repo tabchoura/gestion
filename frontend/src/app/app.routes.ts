@@ -2,15 +2,12 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 
 export const routes: Routes = [
-  // Accueil
   { path: '', loadComponent: () => import('./pages/acceuil/acceuil').then(m => m.AccueilComponent) },
   { path: 'acceuil', loadComponent: () => import('./pages/acceuil/acceuil').then(m => m.AccueilComponent) },
 
-  // Auth
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./pages/register/register').then(m => m.RegisterComponent) },
 
-  // Espace client
   {
     path: 'dashboardclient',
     loadComponent: () => import('./pages/dashboard-client/dashboard-client').then(m => m.DashboardClientComponent),
@@ -19,23 +16,18 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'profile' },
       { path: 'profile',  loadComponent: () => import('./pages/dashboard-client/profile/profile').then(m => m.ProfileComponent) },
 
-      // Comptes
       { path: 'comptes',  loadComponent: () => import('./pages/dashboard-client/compte/compte').then(m => m.ComptesComponent) },
 
-      // Demandes de chéquier
-      // ⚠️ route paramétrée en premier
       { path: 'demandes/:compteId', loadComponent: () => import('./pages/dashboard-client/demande/demande').then(m => m.DemandeComponent) },
       { path: 'demandes',           loadComponent: () => import('./pages/dashboard-client/demande/demande').then(m => m.DemandeComponent) },
-{ path: 'historique', loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) },
-{ path: 'historique/:type/:id', loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) },
 
-// alias pour ton lien existant "historiques"
-{ path: 'historiques', pathMatch: 'full', redirectTo: 'historique' },
+      { path: 'historique',            loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) },
+      { path: 'historique/:type/:id',  loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) },
 
-
+      // Alias si ton menu pointe sur "historiques"
+      { path: 'historiques', pathMatch: 'full', redirectTo: 'historique' },
     ]
   },
 
-  // Fallback
   { path: '**', redirectTo: '' }
 ];
