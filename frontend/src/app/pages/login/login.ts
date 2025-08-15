@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
 
     const v = this.form.value;
 
-    // 🔧 normaliser l'email (évite les espaces/majuscules)
+    // Normaliser l'email
     const email = (v.email ?? '').toString().normalize('NFKC').trim().toLowerCase();
 
     const payload: LoginRequest = {
@@ -53,22 +53,19 @@ export class LoginComponent implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: LoginResponse) => {
-const rawRole = res.user?.role ?? res.role ?? null;
+          const rawRole = res.user?.role ?? res.role ?? null;
           const role = this.normalizeRole(rawRole);
 
-          // Conserver le rôle normalisé (utile pour les guards)
           if (role) localStorage.setItem('role', role);
 
           // "remember": bascule token/user vers sessionStorage si décoché
           if (!v.remember) {
             const token = localStorage.getItem('token');
             const user  = localStorage.getItem('user');
-            if (token && user) {
-              sessionStorage.setItem('token', token);
-              sessionStorage.setItem('user',  user);
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-            }
+            const roleS = localStorage.getItem('role');
+            if (token) { sessionStorage.setItem('token', token); localStorage.removeItem('token'); }
+            if (user)  { sessionStorage.setItem('user',  user);  localStorage.removeItem('user');  }
+            if (roleS) { sessionStorage.setItem('role',  roleS);  localStorage.removeItem('role');  }
           }
 
           this.redirectByRole(role);
@@ -84,7 +81,6 @@ const rawRole = res.user?.role ?? res.role ?? null;
       });
   }
 
-  // ✅ Normalise le rôle renvoyé par le back
   private normalizeRole(role: string | null | undefined): 'CLIENT' | 'AGENT' | 'ADMIN' | null {
     if (!role) return null;
     const r = role.toString().trim().toUpperCase().replace(/^ROLE_/, '');
@@ -92,7 +88,6 @@ const rawRole = res.user?.role ?? res.role ?? null;
     return null;
   }
 
-  // ✅ Route mapping centralisé
   private redirectByRole(role: 'CLIENT' | 'AGENT' | 'ADMIN' | null) {
     const map: Record<'CLIENT' | 'AGENT' | 'ADMIN', string> = {
       CLIENT: '/dashboardclient/profile',
@@ -101,14 +96,8 @@ const rawRole = res.user?.role ?? res.role ?? null;
     };
 
     const target = role ? map[role] : null;
-
-    if (target) {
-      this.router.navigateByUrl(target);
-    } else {
-      // Si le rôle ne matche pas, tente un fallback utile (ex: profil client)
-      // ou reste sur login. Ici on reste sur l'accueil par défaut si rien d'autre.
-      this.router.navigateByUrl('/');
-    }
+    if (target) this.router.navigateByUrl(target);
+    else this.router.navigateByUrl('/');
   }
 
   // Helpers template

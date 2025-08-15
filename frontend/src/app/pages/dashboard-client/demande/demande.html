@@ -9,34 +9,19 @@
   </button>
 </div>
 
-<!-- Sélecteur de compte : caché si on arrive avec /demandes/:compteId -->
-<div class="card" *ngIf="!forceCompte()">
-  <label>Choisir un compte bancaire</label>
-  <select #acc (change)="onSelectCompte(acc.value)">
-    <option value="">-- Sélectionner un compte --</option>
-    <option *ngFor="let c of comptes" [value]="c.id" [selected]="c.id === compteIdSel()">
-      {{ c.banque }} — {{ c.numeroCompte }} ({{ c.devise }})
-    </option>
-  </select>
-</div>
-
-<!-- Rappel du compte forcé (aucune arrow function ici) -->
-<div class="card" *ngIf="forceCompte() && compteIdSel()">
-  <div class="title small">
-    Compte sélectionné :
-    <b>{{ selectedBanque }} — {{ selectedNumero }}</b>
-  </div>
-</div>
-
-<!-- Liste + Actions -->
-<div *ngIf="compteIdSel()" class="card list">
+<!-- Liste + Actions (création directe) -->
+<div class="card list">
   <div class="list-header">
-    <div class="title small"><i class="ri-booklet-line"></i> Demandes du Compte</div>
-  <button class="btn success"
-          *ngIf="!forceCompte()"
-          (click)="openModal()">
-    <i class="ri-add-line"></i> Nouvelle Demande
-  </button>  </div>
+    <div class="title small">
+      <!-- infos compte si besoin -->
+      <!-- <ng-container *ngIf="selectedCompte">
+        — <b>{{ selectedCompte.banque }} — {{ selectedCompte.numeroCompte }} ({{ selectedCompte.devise || '—' }})</b>
+      </ng-container> -->
+    </div>
+    <button class="btn success" (click)="openModal()" [disabled]="!compteIdSel()">
+      <i class="ri-add-line"></i> Nouvelle Demande
+    </button>
+  </div>
 
   <table class="table" *ngIf="demandes?.length; else empty">
     <thead>
@@ -55,28 +40,38 @@
         <td>{{ d.motif || '—' }}</td>
         <td><span [class]="badgeClass(d.statut)">{{ d.statut.replace('_',' ') }}</span></td>
         <td class="actions">
-          <button class="icon blue" title="Détails"><i class="ri-list-check"></i></button>
-          <button class="icon dark" title="Annuler" *ngIf="d.statut==='EN_ATTENTE'" (click)="annuler(d)">
-            <i class="ri-close-circle-line"></i>
-          </button>
-          <button class="icon danger" title="Supprimer" (click)="supprimer(d)">
-            <i class="ri-delete-bin-6-line"></i>
-          </button>
+      <button class="icon blue" title="Modifier" (click)="modifier(d)">
+  <i class="ri-edit-2-line">✏</i>
+</button>
+
+<button class="icon dark" title="Annuler" *ngIf="d.statut==='EN_ATTENTE'" (click)="annuler(d)">
+  <i class="ri-close-circle-line">❌</i>
+</button>
+
+
         </td>
       </tr>
     </tbody>
   </table>
 
   <ng-template #empty>
-    <div class="empty">Aucune demande pour ce compte.</div>
+    <div class="empty" *ngIf="compteIdSel(); else noCompte">Aucune demande.</div>
+  </ng-template>
+  <ng-template #noCompte>
+    <!-- <div class="empty">Aucun compte disponible.</div> -->
   </ng-template>
 </div>
 
+<!-- Modale création / édition -->
 <div class="modal-backdrop" *ngIf="showModal()"></div>
 <div class="modal" *ngIf="showModal()">
   <div class="modal-header">
-    <div class="title">Nouvelle Demande</div>
-    <button class="icon" (click)="closeModal()"><i class="ri-close-line"></i></button>
+    <div class="title">
+      {{ editMode() ? 'Modifier la Demande' : 'Nouvelle Demande' }}
+    </div>
+    <button class="icon" (click)="closeModal()" aria-label="Fermer">
+      <i class="ri-close-line"></i>
+    </button>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()">
@@ -97,7 +92,12 @@
 
     <div class="modal-footer">
       <button type="button" class="btn light" (click)="closeModal()">Annuler</button>
-      <button type="submit" class="btn primary" [disabled]="form.invalid">Créer</button>
+      <button type="submit"
+              class="btn"
+              [ngClass]="editMode() ? 'warning' : 'primary'"
+              [disabled]="form.invalid || !compteIdSel()">
+        {{ editMode() ? 'Enregistrer' : 'Créer' }}
+      </button>
     </div>
   </form>
 </div>

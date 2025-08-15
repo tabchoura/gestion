@@ -227,14 +227,18 @@ body::after {
 }
 
 .btn-primary {
-    background: var(--primary);
-    color: var(--white);
-    box-shadow: var(--shadow-colored);
+   background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-solid);
+    border: 2px solid var(--primary-solid);
+    backdrop-filter: blur(10px);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: var(--shadow-lg);
+  background:  #3b83f661;
+
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-colored);
 }
 
 .btn-ghost {
@@ -415,6 +419,7 @@ i{
     font-size: clamp(2rem, 4vw, 2.8rem);
     font-weight: 800;
     margin-bottom: 3rem;
+    color: #2976f1;
     background: var(--primary);
     -webkit-background-clip: text;
     /* -webkit-text-fill-color: transparent; */
@@ -427,7 +432,7 @@ i{
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: #0538a6;
 }
 
 .section p {

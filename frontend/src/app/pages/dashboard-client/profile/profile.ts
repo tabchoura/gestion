@@ -46,11 +46,15 @@ export class ProfileComponent implements OnInit {
         this.form.patchValue({ email: u.email, nom: u.nom, prenom: u.prenom });
         this.loading.set(false);
       },
-      error: () => {
+      error: (e) => {
         this.loading.set(false);
-        this.err.set('Session expirée. Veuillez vous reconnecter.');
-        this.auth.logout();
-        this.router.navigateByUrl('/login');
+        if (e?.status === 401) {
+          // ❌ Ne pas logout ici
+          this.err.set('Session non valide pour /users/me. Vous pouvez vous reconnecter.');
+          // Optionnel: afficher un bouton de reconnexion (voir template)
+        } else {
+          this.err.set('Erreur lors du chargement du profil.');
+        }
       }
     });
   }
@@ -69,7 +73,7 @@ export class ProfileComponent implements OnInit {
         this.toggleEdit();
         if (emailChanged) {
           this.msg.set('Profil mis à jour. Veuillez vous reconnecter suite au changement d’email.');
-          setTimeout(() => { this.auth.logout(); this.router.navigateByUrl('/login'); }, 800);
+          // Proposer la reconnexion, sans forcer immédiatement
         } else {
           this.load();
         }
@@ -79,5 +83,11 @@ export class ProfileComponent implements OnInit {
         this.err.set(e?.error?.message || 'Mise à jour impossible.');
       }
     });
+  }
+
+  // Bouton dans le template pour forcer la reconnexion propre
+  reconnect() {
+    this.auth.logout();
+    this.router.navigateByUrl('/login');
   }
 }

@@ -1,4 +1,3 @@
-// src/app/core/auth.service.ts
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -72,25 +71,40 @@ export class AuthService {
     return headers;
   }
 
- register(payload: RegisterPayload): Observable<RegisterResponse> {
-  return this.http.post<RegisterResponse>(`${this.api}/auth/register`, payload)
-    .pipe(
-      tap(res => {
-        if (res?.token && res?.user) this.persistAuthData(res.token, res.user, false);
-      }),
-      catchError(err => throwError(() => err))
-    );
-}
-login(payload: LoginRequest) {
-  return this.http.post<LoginResponse>(`${this.api}/auth/login`, payload).pipe(
-    tap(res => {
-      if (res.token) {
-        localStorage.setItem('token', res.token); // ✅ stocker le token
-      }
-    })
-  );
-}
+  // ===== Auth =====
+  register(payload: RegisterPayload): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.api}/auth/register`, payload)
+      .pipe(
+        tap(res => {
+          if (res?.token && res?.user) this.persistAuthData(res.token, res.user, false);
+        }),
+        catchError(err => throwError(() => err))
+      );
+  }
 
+  login(payload: LoginRequest) {
+    return this.http.post<LoginResponse>(`${this.api}/auth/login`, payload).pipe(
+      tap(res => {
+        // ✅ Toujours stocker le token
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+        }
+        // ✅ Stocker user + role si renvoyés (évite d'appeler /users/me juste après)
+        if (res.user) {
+          localStorage.setItem('user', JSON.stringify(res.user));
+          if (res.user.role) localStorage.setItem('role', res.user.role);
+          // hydrater les signals
+          this.currentUser.set(res.user);
+          this.currentRole.set(res.user.role);
+          this.isLoggedIn.set(true);
+          this.authState$.next(true);
+        } else if (res.role) {
+          localStorage.setItem('role', res.role);
+          this.currentRole.set(res.role);
+        }
+      })
+    );
+  }
 
   // ===== Logout =====
   logout(): void {
@@ -110,17 +124,20 @@ login(payload: LoginRequest) {
   }
 
   // ===== Profil =====
-me(): Observable<User> {
-  return this.http.get<User>(`${this.api}/users/me`, { headers: this.getHttpHeaders() })
-    .pipe(
-      tap(user => this.updateUserData(user)),
-      catchError(err => throwError(() => err))
-    );
-}
+  me(): Observable<User> {
+    return this.http.get<User>(`${this.api}/users/me`, { headers: this.getHttpHeaders() })
+      .pipe(
+        tap(user => this.updateUserData(user)),
+        catchError(err => throwError(() => err))
+      );
+  }
 
   updateProfile(payload: { nom: string; prenom: string; email: string }): Observable<User> {
     return this.http.put<User>(`${this.api}/users/profile`, payload, { headers: this.getHttpHeaders() })
-      .pipe(tap(user => this.updateUserData(user)), catchError(err => throwError(() => err)));
+      .pipe(
+        tap(user => this.updateUserData(user)),
+        catchError(err => throwError(() => err))
+      );
   }
 
   changePassword(payload: { currentPassword: string; newPassword: string }): Observable<any> {

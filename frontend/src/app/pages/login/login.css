@@ -332,15 +332,19 @@ form{position:relative;z-index:1;}
 .btn:hover:not(:disabled)::before { width: 300px; height: 300px; }
 
 .btn-primary {
-  background: var(--primary);
-  color: var(--white);
-  box-shadow: var(--shadow-blue);
+  background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-solid);
+    border: 2px solid var(--primary-solid);
+    backdrop-filter: blur(10px);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: hsla(217, 82%, 46%, 0.655);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px ;
+  background:   #3b82f6;
+  background:  #3b83f661;
+
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-colored);
 }
 
 /* .btn-primary:active:not(:disabled) { transform: translateY(0); } */

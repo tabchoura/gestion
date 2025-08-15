@@ -1,47 +1,266 @@
-:host { display: block; padding: 24px; }
-
-.card { background: #fff; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.06); padding: 18px; margin-bottom: 18px; }
-.card.header { display:flex; align-items:center; justify-content:space-between; background:#0d6efd; color:#fff; }
-.card.header .title{ font-size:28px; font-weight:700; display:flex; gap:12px; align-items:center; }
-.card .title.small{ font-size:20px; font-weight:700; display:flex; gap:10px; align-items:center; }
-.list-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-
-label{ display:block; font-weight:600; margin:8px 0 6px; }
-select, input[type="date"], input[type="text"]{
-  width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; outline:none;
+/* ===== CONTENEUR PRINCIPAL ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+  font-family: Arial, sans-serif;
 }
-select:focus, input:focus{ border-color:#0d6efd; }
 
-.table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
-.table th{ background:#0d6efd; color:#fff; text-align:left; padding:12px; }
-.table td{ background:#f8fafc; padding:12px; }
-.table .actions{ width:180px; text-align:right; }
-
-.btn{ border:0; border-radius:12px; padding:10px 14px; cursor:pointer; font-weight:600; }
-.btn.primary{ background:#0d6efd; color:#fff; }
-.btn.success{ background:#198754; color:#fff; }
-.btn.light{ background:#eef2ff; color:#111; }
-.icon{ border:0; background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer; }
-.icon.danger{ background:#fee2e2; }
-.icon.dark{ background:#e5e7eb; }
-.icon.blue{ background:#dbeafe; }
-.icon i{ font-size:18px; }
-
-.badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; }
-.badge.gray{ background:#6b7280; color:#fff; }
-.badge.green{ background:#16a34a; color:#fff; }
-.badge.red{ background:#ef4444; color:#fff; }
-.badge.dark{ background:#111827; color:#fff; }
-
-.empty{ padding:16px; color:#6b7280; }
-.error{ margin-top:10px; color:#ef4444; }
-
-.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); }
-.modal{
-  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-  width:min(620px, 92%); background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.2);
+/* ===== CARTE ===== */
+.card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #e8f2ff;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+  overflow: hidden;
+  width: 100%;
+  max-width: 1000px;
+  margin: 20px auto;
 }
-.modal-header{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid #eef2f7; }
-.modal-header .title{ font-size:22px; font-weight:700; }
-.modal-body{ padding:16px 18px; display:grid; gap:12px; }
-.modal-footer{ display:flex; justify-content:flex-end; gap:10px; padding:12px 18px; border-top:1px solid #eef2f7; }
+
+/* ===== HEADER DE LA CARTE ===== */
+.card.header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.card.header .title {
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== LISTE ===== */
+.card.list {
+  padding: 20px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* alignement vertical propre */
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+/* ===== TABLEAU ===== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.table th, .table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8f2ff;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  background: #f1f7ff;
+  font-weight: bold;
+  color: #357abd;
+}
+
+.table tr:hover {
+  background: #f8fbff;
+}
+
+/* Colonne Actions : centrée et largeur fixe pour les 3 icônes */
+.table th.actions, .table td.actions {
+  text-align: center;
+  width: 150px; /* ajuste si besoin */
+}
+
+/* ===== BADGES STATUT ===== */
+.badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.badge.EN_ATTENTE { background: #fff3cd; color: #856404; }
+.badge.VALIDEE    { background: #d4edda; color: #155724; }
+.badge.REFUSEE    { background: #f8d7da; color: #721c24; }
+
+/* ===== ICON BUTTONS (clairs et visibles) ===== */
+/* Taille et contraste des icônes elles-mêmes */
+.icon-symbol {
+  font-size: 20px;         /* plus grand = plus lisible */
+  line-height: 1;
+}
+
+/* Bouton icône : taille plus grande, couleurs vives */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 2px;
+  border: 2px solid transparent;
+  background: transparent;   /* pas de fond plein */
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 20px;
+  transition: all 0.2s ease;
+}.icon i {
+  font-size: 20px;
+  line-height: 1;
+}
+
+
+.icon:hover {
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* Couleurs améliorées */
+.icon.blue {
+  background: #f09a10;
+}
+.icon.blue:hover {
+  background:#f09a103f;
+}
+
+.icon.dark {
+  background: rgb(255, 25, 25);
+}
+.icon.dark:hover {
+  background: rgba(255, 25, 25, 0.151);;
+}
+
+.icon.danger {
+  background: #dc3545;
+}
+.icon.danger:hover {
+  background: #bb2d3b;
+}
+
+
+/* ===== MODALE ===== */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+}
+
+.modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-body label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.modal-body input,
+.modal-body select {
+  padding: 12px;
+  border: 2px solid #e8f2ff;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.modal-body input:focus,
+.modal-body select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74,144,226,0.2);
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ===== BOUTONS ===== */
+.btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: white;
+}
+
+.btn.primary:hover {
+  background: linear-gradient(135deg, #357abd, #2a5d9f);
+}
+
+.btn.light {
+  background: white;
+  border: 2px solid #4a90e2;
+  color: #4a90e2;
+}
+
+.btn.light:hover {
+  background: #4a90e2;
+  color: white;
+}
+
+.btn.success {
+  background: #28a745;
+  color: white;
+}
+.btn.success:hover {
+  background: #218838;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .list-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .table th, .table td {
+    padding: 8px 10px;
+  }
+
+  .table th.actions, .table td.actions {
+    width: 130px;
+  }
+}

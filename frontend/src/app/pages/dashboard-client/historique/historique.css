@@ -1,8 +1,195 @@
-.header { display:flex; justify-content:space-between; align-items:center; }
-.table table { width:100%; border-collapse: collapse; }
-.table th, .table td { padding: 8px 10px; border-bottom: 1px solid #eee; text-align:left; }
-.mini { font-size: 12px; padding: 4px 8px; }
-.payload pre { background:#0b1022; color:#e5f0ff; padding:12px; border-radius:8px; overflow:auto; }
-.card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.06); margin-bottom:12px; }
-.title { font-weight:600; display:flex; gap:8px; align-items:center; }
-.btn.light { background:#f5f6fb; border:1px solid #e5e7ef; }
+/* ===== CONTAINER GLOBAL ===== */
+.historique-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0;
+  position: relative; /* pour positionner .actions dans le bandeau */
+  font-family: Arial, sans-serif;
+}
+
+/* ===== BANDEAU TITRE ===== */
+.historique-container > h2 {
+  margin: 0;
+  padding: 18px 22px;
+  padding-right: 160px;           /* réserve la place du bouton à droite */
+  color: #fff;
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+  font-size: 20px;
+}
+
+/* ===== CORPS DE CARTE (après le bandeau) ===== */
+.historique-container > .history-list,
+.historique-container > .error,
+.historique-container > .loading,
+.historique-container > .empty {
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #e8f2ff;
+  border-top: none;                /* fusion visuelle avec le bandeau */
+  border-radius: 0 0 20px 20px;    /* coins arrondis seulement en bas */
+  box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+  padding: 16px 18px;
+}
+
+/* ===== ACTIONS DANS LE BANDEAU (bouton à droite) ===== */
+/* on ne met PAS .actions dans le bloc "carte" ci-dessus */
+.historique-container > .actions {
+  position: absolute;
+  top: 12px;     /* aligné verticalement avec le h2 */
+  right: 22px;   /* même padding horizontal que le h2 */
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.historique-container > .actions button {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: #fff;
+}
+
+.historique-container > .actions button:hover {
+  background: linear-gradient(135deg, #357abd, #2a5d9f);
+}
+
+.historique-container > .actions button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== ÉTATS ===== */
+.loading {
+  text-align: center;
+  font-weight: 600;
+  color: #357abd;
+}
+
+.error {
+  background: #f8d7da;
+  border: 2px solid #dc3545;
+  color: #721c24;
+  font-weight: 600;
+}
+
+.empty {
+  text-align: center;
+  color: #6c7b8a;
+  padding: 24px 10px;
+  font-weight: 600;
+}
+
+/* ===== LISTE ===== */
+.history-list { padding: 0; }
+
+.history-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e8f2ff;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.history-item:hover {
+  background: #f8fbff;
+  transform: translateY(-1px);
+}
+
+/* header d’un item */
+.history-item .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.history-item .left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0; /* gestion ellipsis */
+}
+
+.summary {
+  font-weight: 700;
+  color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* badges */
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f1f7ff;
+  color: #2a5d9f;
+  border: 1px solid #cfe3ff;
+  line-height: 1;
+}
+
+/* date */
+.date {
+  color: #6c7b8a;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* contenu/message */
+.content .message {
+  margin: 6px 0 8px;
+  background: #fff;
+  border: 2px solid #e8f2ff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #2c3e50;
+}
+
+/* meta */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  color: #4a5b6a;
+  font-size: 13px;
+}
+
+.meta .email { font-weight: 600; color: #2c3e50; }
+.meta .page, .meta .resource { opacity: 0.9; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .historique-container > h2 {
+    font-size: 18px;
+    padding: 16px;
+    padding-right: 120px; /* espace réduit pour le bouton sur mobile */
+  }
+
+  .historique-container > .actions {
+    top: 10px;
+    right: 16px;
+  }
+
+  .historique-container > .actions button {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+  }
+
+  .history-item { padding: 12px; }
+  .summary { max-width: 60vw; }
+}

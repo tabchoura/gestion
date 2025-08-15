@@ -1,94 +1,144 @@
+// src/app/pages/dashboard-client/historique/historique.ts
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { HistoriqueService, HistoriqueItem, RessourceType } from '../../../core/historique.service';
+import { CommonModule } from '@angular/common';
+import { HistoriqueService, Historique } from '../../../core/historique.service';
 
 @Component({
-  standalone: true,
   selector: 'app-historique',
-  imports: [CommonModule, DatePipe],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './historique.html',
   styleUrls: ['./historique.css']
 })
 export class HistoriqueComponent implements OnInit {
-  private api = inject(HistoriqueService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private hist = inject(HistoriqueService);
 
-  items = signal<HistoriqueItem[]>([]);
-  loading = signal<boolean>(false);
-  error = signal<string | null>(null);
-
-  mode = signal<'me' | 'resource' | 'type'>('me');
-  currentType = signal<RessourceType | null>(null);
-  currentId = signal<number | null>(null);
-
-  expanded = new Set<number>();
-  toggleRow(id: number) { this.expanded.has(id) ? this.expanded.delete(id) : this.expanded.add(id); }
-  isExpanded(id: number) { return this.expanded.has(id); }
+  historique = signal<Historique[]>([]);
+  loading = signal<boolean>(true);
+  errorMsg = signal<string | null>(null);
 
   ngOnInit() {
-    this.route.paramMap.subscribe(pm => {
-      const type = pm.get('type') as RessourceType | null;
-      const id = pm.get('id');
-      if (type && id) {
-        this.mode.set('resource');
-        this.currentType.set(type);
-        this.currentId.set(+id);
-        this.loadResource(type, +id);
-        return;
-      }
-      const qType = this.route.snapshot.queryParamMap.get('type') as RessourceType | null;
-      const qId = this.route.snapshot.queryParamMap.get('id');
-      if (qType && qId) {
-        this.mode.set('resource');
-        this.currentType.set(qType);
-        this.currentId.set(+qId);
-        this.loadResource(qType, +qId);
-        return;
-      }
-      if (qType && !qId) {
-        this.mode.set('type');
-        this.currentType.set(qType);
-        this.loadByType(qType);
-        return;
-      }
-      this.mode.set('me');
-      this.loadMy();
-    });
+    console.log('=== HISTORIQUE COMPONENT INIT ===');
+    this.load();
   }
 
-  private loadMy() {
+  load() {
+    console.log('=== LOAD HISTORIQUE ===');
     this.loading.set(true);
-    this.api.listMy().subscribe({
-      next: rows => { this.items.set(rows); this.loading.set(false); this.error.set(null); },
-      error: (e) => { this.error.set(`Impossible de charger votre historique (${e.status || '??'}).`); this.loading.set(false); }
-    });
-  }
+    this.errorMsg.set(null);
 
-  private loadResource(type: RessourceType, id: number) {
-    this.loading.set(true);
-    this.api.listByResource(type, id).subscribe({
-      next: rows => { this.items.set(rows); this.loading.set(false); this.error.set(null); },
-      error: (e) => { this.error.set(`Impossible de charger l’historique de la ressource (${e.status || '??'}).`); this.loading.set(false); }
-    });
-  }
-
-  private loadByType(type: RessourceType) {
-    this.loading.set(true);
-    this.api.listByType(type).subscribe({
-      next: rows => { this.items.set(rows); this.loading.set(false); this.error.set(null); },
-      error: (e) => { this.error.set(`Impossible de charger l’historique par type (${e.status || '??'}).`); this.loading.set(false); }
-    });
-  }
-
-  back(): Promise<boolean> {
-    if (this.mode() === 'resource') {
-      const t = this.currentType();
-      if (t === 'DEMANDE_CHEQUIER') return this.router.navigate(['/dashboardclient/demandes', this.currentId()]);
-      if (t === 'COMPTE')           return this.router.navigate(['/dashboardclient/comptes']);
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      console.error('Aucun token trouvé');
+      this.errorMsg.set('Non authentifié - pas de token');
+      this.loading.set(false);
+      return;
     }
-    return this.router.navigate(['/dashboardclient/profile']);
+
+    this.hist.mine().subscribe({
+      next: (res: Historique[]) => {
+        console.log('Réponse reçue:', res);
+        this.historique.set(res ?? []);
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement:', err);
+        let msg = 'Impossible de charger l’historique.';
+        if (err.status === 401) msg = 'Non authentifié - token invalide ou expiré';
+        else if (err.status === 403) msg = 'Accès refusé';
+        else if (err.status === 0) msg = 'Impossible de contacter le serveur';
+        this.errorMsg.set(msg);
+      },
+      complete: () => {
+        console.log('Chargement terminé');
+        this.loading.set(false);
+      }
+    });
   }
-  
+
+  // === Manque précédemment : méthodes utilisées par le template ===
+  actionLabel(action: string): string {
+    const map: Record<string, string> = {
+      LOGIN: 'Connexion',
+      LOGOUT: 'Déconnexion',
+      DEMANDE_CREE: 'Demande créée',
+      DEMANDE_MISE_A_JOUR: 'Demande mise à jour',
+      DEMANDE_SUPPRIMEE: 'Demande supprimée',
+      PROFILE_MIS_A_JOUR: 'Profil mis à jour',
+      TEST: 'Événement de test',
+      TEST_LOG_COMPONENT: 'Test (composant)',
+      TEST_LOG_OBSERVABLE: 'Test (observable)',
+      TEST_MANUEL: 'Test manuel'
+    };
+    return map[action] ?? action;
+  }
+
+  summary(item: Historique): string {
+    const d = item?.creeLe ? new Date(item.creeLe) : new Date();
+    const heure = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    const id = item.ressourceId ? ` #${item.ressourceId}` : '';
+
+    switch (item.action) {
+      case 'LOGIN': return `Connexion effectuée à ${heure}.`;
+      case 'LOGOUT': return `Déconnexion effectuée à ${heure}.`;
+      case 'DEMANDE_CREE': return `Demande${id} créée à ${heure}.`;
+      case 'DEMANDE_MISE_A_JOUR': return `Demande${id} mise à jour à ${heure}.`;
+      case 'DEMANDE_SUPPRIMEE': return `Demande${id} supprimée à ${heure}.`;
+      case 'PROFILE_MIS_A_JOUR': return `Profil mis à jour à ${heure}.`;
+      default: return `${this.actionLabel(item.action)} à ${heure}.`;
+    }
+  }
+  // === fin des méthodes manquantes ===
+
+  // Test de log depuis le composant
+  testLog() {
+    console.log('=== TEST LOG BUTTON CLICKED ===');
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      console.error('Pas de token pour le test');
+      alert('Pas de token - vous devez être connecté');
+      return;
+    }
+
+    this.hist.logAction(
+      'TEST_LOG_COMPONENT',
+      'Test depuis le composant historique',
+      'COMPONENT',
+      'historique-component',
+      'Composant Historique',
+      '/dashboard/historique'
+    );
+
+    setTimeout(() => this.load(), 800);
+  }
+
+  testLogObservable() {
+    console.log('=== TEST LOG OBSERVABLE ===');
+    this.hist.log('TEST_LOG_OBSERVABLE', '/dashboard/historique').subscribe({
+      next: () => { alert('Log enregistré avec succès !'); this.load(); },
+      error: (e) => { console.error('Erreur log observable:', e); alert('Erreur lors de l’enregistrement du log'); }
+    });
+  }
+
+  testManualLog() {
+    console.log('=== TEST MANUAL LOG ===');
+
+    const testEntry = {
+      action: 'TEST_MANUEL',
+      message: 'Test manuel depuis le composant',
+      page: typeof window !== 'undefined' ? window.location.pathname : '/dashboard/historique',
+      ressourceType: 'TEST',
+      ressourceId: 'manual-test-' + Date.now(),
+      ressourceLabel: 'Test Manuel',
+      payloadJson: JSON.stringify({
+        test: true,
+        timestamp: new Date().toISOString(),
+        component: 'HistoriqueComponent'
+      })
+    };
+
+    this.hist.addHistoryEntry(testEntry).subscribe({
+      next: () => { alert('Test manuel réussi !'); this.load(); },
+      error: (error) => { console.error('Erreur test manuel:', error); alert('Erreur test manuel'); }
+    });
+  }
 }

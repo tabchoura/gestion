@@ -1,60 +1,59 @@
-<div class="card header">
-  <div class="title">
-    <i class="ri-time-line"></i>
-    <ng-container [ngSwitch]="mode()">
-      <span *ngSwitchCase="'me'">Mon Historique</span>
-      <span *ngSwitchCase="'type'">Historique — {{ currentType() }}</span>
-      <span *ngSwitchCase="'resource'">Historique — {{ currentType() }} #{{ currentId() }}</span>
-    </ng-container>
+<div class="historique-container">
+  <h2>Mon Historique</h2>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMsg()" class="error">
+    {{ errorMsg() }}
   </div>
 
-  <button class="btn light" (click)="back()">
-    <i class="ri-arrow-left-line"></i> Retour
-  </button>
-</div>
+  <!-- Boutons d'action -->
+  <div class="actions">
+    <button (click)="load()" [disabled]="loading()">
+      {{ loading() ? 'Chargement...' : 'Actualiser' }}
+    </button>
+  </div>
 
-<ng-container *ngIf="!loading(); else loadingTpl">
-  <div class="card" *ngIf="error(); else okTpl">{{ error() }}</div>
-  <ng-template #okTpl>
-    <div class="card" *ngIf="!items().length">Aucun événement.</div>
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading">
+    Chargement...
+  </div>
 
-    <div class="card table" *ngIf="items().length">
-      <table>
-        <thead>
-          <tr>
-            <th>Quand</th>
-            <th>Action</th>
-            <th>Type</th>
-            <th>Ressource</th>
-            <th>Message</th>
-            <th>Détails</th>
-          </tr>
-        </thead>
-        <tbody>
-          <ng-container *ngFor="let it of items()">
-            <tr>
-              <td>{{ it.creeLe | date:'short' }}</td>
-              <td>{{ it.action }}</td>
-              <td>{{ it.ressourceType }}</td>
-              <td>
-                <span *ngIf="it.ressourceId">#{{ it.ressourceId }}</span>
-                <span *ngIf="it.ressourceLabel"> — {{ it.ressourceLabel }}</span>
-              </td>
-              <td>{{ it.message || '—' }}</td>
-              <td>
-                <button class="mini" (click)="toggleRow(it.id)" *ngIf="it.payloadJson">Voir</button>
-              </td>
-            </tr>
-            <tr class="payload" *ngIf="isExpanded(it.id)">
-              <td colspan="6"><pre>{{ it.payloadJson }}</pre></td>
-            </tr>
-          </ng-container>
-        </tbody>
-      </table>
+  <!-- Liste -->
+  <div *ngIf="!loading()" class="history-list">
+    <div *ngIf="historique().length === 0" class="empty">
+      Aucun historique trouvé.
     </div>
-  </ng-template>
-</ng-container>
 
-<ng-template #loadingTpl>
-  <div class="card">Chargement…</div>
-</ng-template>
+    <div *ngFor="let item of historique()" class="history-item">
+      <div class="header">
+        <div class="left">
+          <span class="badge">{{ actionLabel(item.action) }}</span>
+          <strong class="summary">{{ summary(item) }}</strong>
+        </div>
+        <span class="date" title="{{ item.creeLe | date:'full' }}">
+          {{ item.creeLe | date:'short' }}
+        </span>
+      </div>
+
+      <div class="content">
+        <p *ngIf="item.message" class="message">{{ item.message }}</p>
+
+        <div class="meta">
+          <span class="email" title="Utilisateur">
+            {{ item.acteurEmail }}
+          </span>
+
+          <span *ngIf="item.page" class="page" title="Page">
+            • {{ item.page }}
+          </span>
+
+          <span *ngIf="item.ressourceType || item.ressourceLabel || item.ressourceId" class="resource">
+            • {{ item.ressourceType || 'Ressource' }}
+            <ng-container *ngIf="item.ressourceLabel">: {{ item.ressourceLabel }}</ng-container>
+            <ng-container *ngIf="item.ressourceId"> (#{{ item.ressourceId }})</ng-container>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

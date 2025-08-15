@@ -29,5 +29,10 @@ export const routes: Routes = [
     ]
   },
 
-  { path: '**', redirectTo: '' }
+  // ✅ SUPPRIME OU COMMENTE cette ligne qui cause le problème !
+  // { path: '**', redirectTo: '' }
+  
+  // ✅ Optionnel: garde une route 404 spécifique si besoin
+  // { path: '404', loadComponent: () => import('./pages/not-found/not-found').then(m => m.NotFoundComponent) },
+  // { path: '**', redirectTo: '/404' }
 ];

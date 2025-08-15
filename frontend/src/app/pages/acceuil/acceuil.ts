@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-accueil',
@@ -17,7 +16,7 @@ export class AccueilComponent {
 
   services = [
     { icon: '📦', title: 'Demande de chéquier', desc: 'Faites votre demande en ligne' },
-    { icon: '🔍', title: 'Suivi en temps réel', desc: 'Consultez l’avancement de votre demande' },
+    { icon: '🔍', title: 'Suivi en temps réel', desc: 'Consultez l\'avancement de votre demande' },
     { icon: '📜', title: 'Historique', desc: 'Gardez une trace de vos chéquiers' }
   ];
 
@@ -26,13 +25,30 @@ export class AccueilComponent {
     { note: 4, text: 'Rapide et efficace', name: 'Sami' },
     { note: 5, text: 'Je recommande', name: 'Amel' }
   ];
-  
 
+  // Méthode pour naviguer vers la page de connexion
+  navigateToLogin() {
+    console.log('Navigation vers /login'); 
+    this.router.navigate(['/login']);
+  }
+
+  // Méthode pour naviguer vers la page d'inscription
+  navigateToRegister() {
+    console.log('Navigation vers /register'); 
+    this.router.navigate(['/register']);
+  }
+
+  // Méthode générique pour la navigation
   go(path: string) {
+    console.log(`Navigation vers ${path}`); 
     this.router.navigateByUrl(path);
   }
 
+  // Méthode pour le scroll vers une section
   scrollTo(id: string) {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 }
