@@ -9,18 +9,24 @@
   </button>
 </div>
 
-<!-- Liste + Actions (création directe) -->
+<!-- Liste + Actions -->
 <div class="card list">
   <div class="list-header">
-    <div class="title small">
-      <!-- infos compte si besoin -->
-      <!-- <ng-container *ngIf="selectedCompte">
-        — <b>{{ selectedCompte.banque }} — {{ selectedCompte.numeroCompte }} ({{ selectedCompte.devise || '—' }})</b>
-      </ng-container> -->
+    <div class="title small"></div>
+
+    <div class="inline">
+      <!-- Sélecteur de compte pour filtrer -->
+      <select [ngModel]="compteIdSel()" (ngModelChange)="onSelectCompte($event)">
+        <option [ngValue]="null" disabled>— Choisir un compte —</option>
+        <option *ngFor="let c of comptes" [ngValue]="c.id">
+          {{ c.typeCompte }} — {{ c.numeroCompte }} ({{ c.devise || '—' }})
+        </option>
+      </select>
+
+      <button class="btn success" (click)="openModal()" [disabled]="!compteIdSel()">
+        <i class="ri-add-line"></i> Nouvelle Demande
+      </button>
     </div>
-    <button class="btn success" (click)="openModal()" [disabled]="!compteIdSel()">
-      <i class="ri-add-line"></i> Nouvelle Demande
-    </button>
   </div>
 
   <table class="table" *ngIf="demandes?.length; else empty">
@@ -29,6 +35,7 @@
         <th>Date Demande</th>
         <th>Pages</th>
         <th>Motif</th>
+        <th>Type Compte</th>
         <th>Statut</th>
         <th class="actions">Actions</th>
       </tr>
@@ -38,17 +45,20 @@
         <td>{{ d.dateDemande | date:'dd/MM/yyyy' }}</td>
         <td>{{ d.pages }}</td>
         <td>{{ d.motif || '—' }}</td>
+        <td>{{ d.compte?.typeCompte || '—' }}</td>
         <td><span [class]="badgeClass(d.statut)">{{ d.statut.replace('_',' ') }}</span></td>
         <td class="actions">
-      <button class="icon blue" title="Modifier" (click)="modifier(d)">
-  <i class="ri-edit-2-line">✏</i>
-</button>
+          <button class="icon blue" title="Modifier" (click)="modifier(d)">
+            <i class="ri-edit-2-line">✏</i>
+          </button>
 
-<button class="icon dark" title="Annuler" *ngIf="d.statut==='EN_ATTENTE'" (click)="annuler(d)">
-  <i class="ri-close-circle-line">❌</i>
-</button>
+          <button class="icon dark" title="Annuler" *ngIf="d.statut==='EN_ATTENTE'" (click)="annuler(d)">
+            <i class="ri-close-circle-line">❌</i>
+          </button>
 
-
+          <!-- <button class="icon red" title="Supprimer" (click)="supprimer(d)">
+            <i class="ri-delete-bin-line">🗑</i>
+          </button> -->
         </td>
       </tr>
     </tbody>
@@ -57,9 +67,7 @@
   <ng-template #empty>
     <div class="empty" *ngIf="compteIdSel(); else noCompte">Aucune demande.</div>
   </ng-template>
-  <ng-template #noCompte>
-    <!-- <div class="empty">Aucun compte disponible.</div> -->
-  </ng-template>
+  <ng-template #noCompte></ng-template>
 </div>
 
 <!-- Modale création / édition -->
@@ -76,6 +84,13 @@
 
   <form [formGroup]="form" (ngSubmit)="submit()">
     <div class="modal-body">
+      <label>Compte *</label>
+<select [formControl]="compteCtrl">
+        <option *ngFor="let c of comptes" [value]="c.id">
+          {{ c.typeCompte }} — {{ c.numeroCompte }} ({{ c.devise || '—' }})
+        </option>
+      </select>
+
       <label>Date de demande *</label>
       <input type="date" formControlName="dateDemande" placeholder="jj/mm/aaaa">
 
@@ -95,7 +110,7 @@
       <button type="submit"
               class="btn"
               [ngClass]="editMode() ? 'warning' : 'primary'"
-              [disabled]="form.invalid || !compteIdSel()">
+              [disabled]="form.invalid || submitting()">
         {{ editMode() ? 'Enregistrer' : 'Créer' }}
       </button>
     </div>
@@ -103,3 +118,4 @@
 </div>
 
 <div class="error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+<div class="success" *ngIf="successMsg()">{{ successMsg() }}</div>

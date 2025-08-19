@@ -13,6 +13,17 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../core/auth.service';
 
+// ✅ Interface mise à jour pour le payload d'inscription
+export interface RegisterPayload {
+  role: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  password: string;
+  numCin: string;
+  numCompteBancaire?: string; // ✅ Optionnel maintenant
+}
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -35,11 +46,19 @@ export class RegisterComponent {
   private readonly passwordPattern =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
 
+  // ✅ Regex pour CIN (8 chiffres exactement)
+  private readonly cinPattern = /^[0-9]{8}$/;
+
+  // ✅ Regex pour numéro de compte bancaire (10-20 chiffres)
+  private readonly comptePattern = /^[0-9]{10,20}$/;
+
   form = this.fb.group(
     {
       role: ['', Validators.required],
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prenom: ['', [Validators.required, Validators.minLength(2)]],
+      numCin: ['', [Validators.required, Validators.pattern(this.cinPattern)]],
+      numCompteBancaire: [''], // ✅ Pas de validators par défaut, sera géré dynamiquement
       email: ['', [Validators.required, Validators.email]],
       password: [
         '',
@@ -54,13 +73,42 @@ export class RegisterComponent {
     { validators: [RegisterComponent.passwordsMatch] }
   );
 
-  // ✅ Getters pour les champs
+  // ✅ Getters pour tous les champs
   get role() { return this.form.get('role'); }
   get nom() { return this.form.get('nom'); }
   get prenom() { return this.form.get('prenom'); }
+  get numCin() { return this.form.get('numCin'); }
+  get numCompteBancaire() { return this.form.get('numCompteBancaire'); }
   get email() { return this.form.get('email'); }
   get password() { return this.form.get('password'); }
   get confirmPassword() { return this.form.get('confirmPassword'); }
+
+  constructor() {
+    // ✅ Observer les changements de rôle pour ajuster la validation
+    this.role?.valueChanges.subscribe(roleValue => {
+      this.updateAccountNumberValidation(roleValue || '');
+    });
+  }
+
+  // ✅ Méthode pour ajuster la validation du compte bancaire selon le rôle
+  private updateAccountNumberValidation(role: string) {
+    const accountControl = this.numCompteBancaire;
+    
+    if (role === 'CLIENT') {
+      // Pour les clients : champ requis avec pattern
+      accountControl?.setValidators([
+        Validators.required, 
+        Validators.pattern(this.comptePattern)
+      ]);
+    } else {
+      // Pour les agents : pas de validation (champ optionnel et caché)
+      accountControl?.clearValidators();
+      accountControl?.setValue(''); // Vider le champ
+    }
+    
+    // Mettre à jour la validation
+    accountControl?.updateValueAndValidity();
+  }
 
   // ✅ Validator statique pour la correspondance des mots de passe
   private static passwordsMatch(group: AbstractControl): ValidationErrors | null {
@@ -86,6 +134,8 @@ export class RegisterComponent {
         role: this.role?.errors,
         nom: this.nom?.errors,
         prenom: this.prenom?.errors,
+        numCin: this.numCin?.errors,
+        numCompteBancaire: this.numCompteBancaire?.errors,
         email: this.email?.errors,
         password: this.password?.errors,
         confirmPassword: this.confirmPassword?.errors
@@ -93,18 +143,38 @@ export class RegisterComponent {
       return;
     }
 
-    // ✅ CORRECTION: Enlever confirmPassword avant l'envoi
-    const { confirmPassword, ...registerData } = this.form.value;
-    console.log('📤 Données à envoyer:', { ...registerData, password: '***' });
+    // ✅ CORRECTION PRINCIPALE: Préparer les données selon le rôle
+    const { confirmPassword, ...formData } = this.form.value;
+    
+    // ✅ Créer le payload final en excluant numCompteBancaire pour les agents
+    let registerData: any = {
+      role: formData.role,
+      nom: formData.nom,
+      prenom: formData.prenom,
+      numCin: formData.numCin,
+      email: formData.email,
+      password: formData.password
+    };
+    
+    // ✅ N'ajouter numCompteBancaire QUE pour les clients
+    if (formData.role === 'CLIENT' && formData.numCompteBancaire) {
+      registerData.numCompteBancaire = formData.numCompteBancaire;
+    }
+    
+    console.log('📤 Données à envoyer:', { 
+      ...registerData, 
+      password: '***',
+      numCompteBancaire: registerData.numCompteBancaire ? registerData.numCompteBancaire.substring(0, 4) + '***' : undefined
+    });
 
     this.loading = true;
-    this.auth.register(registerData as any)
+    this.auth.register(registerData)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (response) => {
           console.log('✅ Inscription réussie:', response);
           
-          // ✅ CORRECTION: Gestion sécurisée de la réponse
+          // ✅ Gestion sécurisée de la réponse
           if (response.token && response.user) {
             // Si le backend retourne token + user, l'utilisateur est connecté automatiquement
             console.log('✅ Connexion automatique après inscription');
@@ -120,7 +190,7 @@ export class RegisterComponent {
         error: (err: HttpErrorResponse) => {
           console.error('❌ Erreur inscription:', err);
           
-          // ✅ AMÉLIORATION: Gestion d'erreurs plus précise
+          // ✅ Gestion d'erreurs plus précise
           if (err.error?.message) {
             this.serverError = err.error.message;
           } else if (err.error?.error) {
@@ -128,10 +198,17 @@ export class RegisterComponent {
           } else {
             switch (err.status) {
               case 400:
-                this.serverError = 'Données invalides. Vérifiez vos informations.';
+                // Gestion spécifique pour les nouveaux champs
+                if (err.error?.error?.includes('CIN')) {
+                  this.serverError = 'Ce numéro CIN est déjà utilisé.';
+                } else if (err.error?.error?.includes('compte')) {
+                  this.serverError = 'Ce numéro de compte bancaire est déjà utilisé.';
+                } else {
+                  this.serverError = 'Données invalides. Vérifiez vos informations.';
+                }
                 break;
               case 409:
-                this.serverError = 'Un compte avec cet email existe déjà.';
+                this.serverError = 'Un compte avec ces informations existe déjà.';
                 break;
               case 422:
                 this.serverError = 'Données de formulaire invalides.';
@@ -147,19 +224,19 @@ export class RegisterComponent {
       });
   }
 
-  // ✅ AJOUT: Méthode pour rediriger selon le rôle
+  // ✅ Redirection selon le rôle
   private redirectByRole(role: string) {
     switch (role.toUpperCase()) {
-      case 'ADMIN':
-        this.router.navigate(['/admin/dashboard']);
-        break;
+       case 'ADMIN':
+         this.router.navigate(['/login']);
+         break;
       case 'AGENT':
-        this.router.navigate(['/agent/dashboard']);
+        this.router.navigate(['/login']);
         break;
       case 'CLIENT':
       default:
-        this.router.navigate(['/profile']);
+        this.router.navigate(['/login']);
         break;
     }
   }
-}
+} 

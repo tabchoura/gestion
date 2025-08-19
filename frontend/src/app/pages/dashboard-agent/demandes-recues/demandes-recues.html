@@ -1,0 +1,79 @@
+<div class="container">
+  <!-- Header + stats -->
+  <div class="header-section">
+    <h2>Demandes Reçues</h2>
+    <div class="stats-container">
+      <div class="stat-card"><span class="stat-label">Total:</span><span class="stat-value">{{ statistiques().total }}</span></div>
+      <div class="stat-card warning"><span class="stat-label">En attente:</span><span class="stat-value">{{ statistiques().enAttente }}</span></div>
+      <div class="stat-card success"><span class="stat-label">Approuvées:</span><span class="stat-value">{{ statistiques().approuvees }}</span></div>
+      <div class="stat-card danger"><span class="stat-label">Rejetées:</span><span class="stat-value">{{ statistiques().rejetees }}</span></div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label for="statutFilter">Filtrer par statut:</label>
+      <select id="statutFilter" [ngModel]="statutFilter()" (ngModelChange)="onFilterStatut($event)">
+        <option value="">Tous les statuts</option>
+        <option value="EN_ATTENTE">En Attente</option>
+        <option value="APPROUVEE">Approuvée</option>
+        <option value="REJETEE">Rejetée</option>
+        <option value="ANNULEE">Annulée</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="clientFilter">Filtrer par client:</label>
+      <input id="clientFilter" type="text" placeholder="Nom ou email" [ngModel]="clientFilter()" (ngModelChange)="onFilterClient($event)" />
+    </div>
+
+    <button class="btn btn-secondary" type="button" (click)="clearFilters()">Effacer les filtres</button>
+    <button class="btn btn-primary" type="button" (click)="refresh()" [disabled]="loading()">Actualiser</button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMsg()" class="alert alert-danger">{{ errorMsg() }}</div>
+  <div *ngIf="successMsg()" class="alert alert-success">{{ successMsg() }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des demandes...</p>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!loading()" class="demandes-container">
+    <div *ngIf="demandesFiltered().length === 0" class="empty-state">
+      <p>{{ getEmptyMessage() }}</p>
+    </div>
+
+    <div *ngFor="let d of demandesFiltered()" class="demande-card" [ngClass]="getRowClass(d.statut)">
+      <div class="demande-header">
+        <div class="demande-info">
+          <h4>{{ getClientDisplayName(d) }}</h4>
+          <p class="compte-info">Compte: {{ d.compte?.numeroCompte || d.numeroCompte }}</p>
+          <p class="pages-info">{{ d.pages }} pages</p>
+        </div>
+        <div class="demande-meta">
+          <span class="badge" [ngClass]="badgeClass(d.statut)">{{ getStatusLabel(d.statut) }}</span>
+          <p class="date">{{ d.dateDemande | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="d.motif" class="demande-motif"><strong>Motif:</strong> {{ d.motif }}</div>
+
+      <div class="demande-actions">
+        <button type="button" class="btn btn-info btn-sm" (click)="voirDetails(d)">Détails</button>
+
+        <!-- ✅ Boutons visibles uniquement quand EN_ATTENTE -->
+        <ng-container *ngIf="canAct(d)">
+          <button type="button" class="btn btn-success btn-sm" (click)="approuver(d)" [disabled]="submitting()">✓ Approuver</button>
+          <button type="button" class="btn btn-danger btn-sm" (click)="rejeter(d)" [disabled]="submitting()">✗ Rejeter</button>
+        </ng-container>
+
+        <button type="button" class="btn btn-outline-danger btn-sm" (click)="supprimer(d)" [disabled]="submitting()">🗑️ Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>

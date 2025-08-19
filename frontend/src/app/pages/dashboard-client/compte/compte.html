@@ -1,12 +1,10 @@
 <div class="wrap">
   <h2>💳 Mes Comptes Bancaires</h2>
-
   <div class="card">
     <div class="table">
       <!-- Entête -->
       <div class="thead">
-        <div>Banque</div>
-        <div>Titulaire</div>
+        <div>Type de Compte</div>
         <div>N° Compte</div>
         <div>RIB</div>
         <div class="thead-actions">
@@ -17,19 +15,26 @@
 
       <!-- Formulaire inline ajout/édition -->
       <form *ngIf="isAdding() || isEditing()" [formGroup]="form" (ngSubmit)="submit()" class="inline-form">
-        <input formControlName="banque" placeholder="Banque *" />
-        <input formControlName="titulaire" placeholder="Titulaire *" />
+        <select formControlName="typeCompte" required>
+          <option value="" disabled>Sélectionner un type de compte *</option>
+          <option value="compte-epargne">Compte épargne</option>
+          <option value="compte-courant">Compte courant</option>
+          <option value="compte-devises">Compte devises</option>
+          <option value="compte-specifique">Compte spécifique ou investissement</option>
+          <option value="compte-joint">Compte joint</option>
+          <option value="compte-professionnel">Compte professionnel / entreprise</option>
+        </select>
         <input formControlName="numeroCompte" placeholder="N° Compte *" />
         <input formControlName="rib" maxlength="20" placeholder="RIB (20 chiffres, optionnel)" />
         <div class="inline-actions">
           <select formControlName="devise">
             <option *ngFor="let d of devises" [value]="d">{{ d }}</option>
           </select>
-
+          
           <button type="submit" [disabled]="form.invalid || savingFn()">
             {{ isEditing() ? 'Enregistrer' : 'Ajouter' }}
           </button>
-
+          
           <button type="button" class="ghost" (click)="isEditing() ? cancelEdit() : cancelAdd()">
             Annuler
           </button>
@@ -38,8 +43,10 @@
 
       <!-- Lignes -->
       <div class="rowitem" *ngFor="let c of comptesFn()">
-        <div><b>{{ c.banque }}</b> <span class="muted" *ngIf="c.devise">· {{ c.devise }}</span></div>
-        <div>{{ c.titulaire }}</div>
+        <div>
+          <b>{{ getTypeCompteLabel(c.typeCompte) }}</b> 
+          <span class="muted" *ngIf="c.devise">· {{ c.devise }}</span>
+        </div>
         <div>{{ c.numeroCompte }}</div>
         <div>{{ formatRib(c.rib) }}</div>
         <div class="rowactions">
@@ -50,7 +57,7 @@
                   title="Voir chéquier">
             Voir chéquier
           </button>
-
+          
           <button class="mini warn" (click)="startEdit(c)" title="Modifier">Éditer</button>
           <button class="mini danger" (click)="delete(c)" title="Supprimer">Supprimer</button>
         </div>

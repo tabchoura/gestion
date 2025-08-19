@@ -29,10 +29,29 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ SUPPRIME OU COMMENTE cette ligne qui cause le problème !
-  // { path: '**', redirectTo: '' }
-  
-  // ✅ Optionnel: garde une route 404 spécifique si besoin
-  // { path: '404', loadComponent: () => import('./pages/not-found/not-found').then(m => m.NotFoundComponent) },
-  // { path: '**', redirectTo: '/404' }
+
+
+    {
+    path: 'dashboardagent',
+    loadComponent: () => import('./pages/dashboard-agent/dashboard-agent').then(m => m.DashboardAgentComponent),
+    canActivate: [authGuard],
+     children: [
+       { path: '', pathMatch: 'full', redirectTo: 'profileagent,' },
+{ path: 'profileagent',  loadComponent: () => import('./pages/dashboard-agent/profileagent/profile-agent').then(m => m.ProfileComponent) },
+
+{ path: 'demandesrecues', loadComponent: () => import('./pages/dashboard-agent/demandes-recues/demandes-recues').then(m => m.DemandesRecuesComponent) },
+
+    //   { path: 'demandes/:compteId', loadComponent: () => import('./pages/dashboard-client/demande/demande').then(m => m.DemandeComponent) },
+    //   { path: 'demandes',           loadComponent: () => import('./pages/dashboard-client/demande/demande').then(m => m.DemandeComponent) },
+
+       { path: 'historique',            loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) }
+    //   { path: 'historique/:type/:id',  loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) },
+
+    //   // Alias si ton menu pointe sur "historiques"
+    //   { path: 'historiques', pathMatch: 'full', redirectTo: 'historique' },
+    // ]
+  ]  },
 ];
+  
+
+  

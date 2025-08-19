@@ -5,8 +5,7 @@ import { Observable } from 'rxjs';
 
 export interface CompteBancaire {
   id?: number;
-  banque: string;
-  titulaire: string;
+  typeCompte: string; // ✅ Remplace banque + titulaire
   numeroCompte: string;
   rib?: string | null;
   iban?: string | null;

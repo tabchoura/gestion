@@ -38,6 +38,34 @@
             <small class="error" *ngIf="prenom?.touched && prenom?.invalid">Requis (min. 2 caractères).</small>
           </label>
 
+          <!-- Numéro CIN -->
+          <label class="field">
+            <span>Numéro CIN</span>
+            <input type="text" formControlName="numCin" placeholder="12345678"
+                   maxlength="8"
+                   [class.invalid]="numCin?.touched && numCin?.invalid" />
+            <small class="error" *ngIf="numCin?.touched && numCin?.hasError('required')">
+              Numéro CIN requis.
+            </small>
+            <small class="error" *ngIf="numCin?.touched && numCin?.hasError('pattern')">
+              Le CIN doit contenir exactement 8 chiffres.
+            </small>
+          </label>
+
+          <!-- Numéro compte bancaire (CONDITIONNEL - Seulement pour CLIENT) -->
+          <label class="field" *ngIf="role?.value === 'CLIENT'">
+            <span>Numéro de compte bancaire</span>
+            <input type="text" formControlName="numCompteBancaire" placeholder="1234567890123456"
+                   maxlength="20"
+                   [class.invalid]="numCompteBancaire?.touched && numCompteBancaire?.invalid" />
+            <small class="error" *ngIf="numCompteBancaire?.touched && numCompteBancaire?.hasError('required')">
+              Numéro de compte bancaire requis.
+            </small>
+            <small class="error" *ngIf="numCompteBancaire?.touched && numCompteBancaire?.hasError('pattern')">
+              Le numéro de compte doit contenir entre 10 et 20 chiffres.
+            </small>
+          </label>
+
           <!-- Email -->
           <label class="field">
             <span>Email</span>
@@ -48,7 +76,7 @@
               Email requis.
             </small>
             <small class="error" *ngIf="email?.touched && email?.hasError('email')">
-              Format d’adresse email invalide.
+              Format d'adresse email invalide.
             </small>
           </label>
 

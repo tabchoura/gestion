@@ -1,0 +1,16 @@
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="brand">👤 Espace Agent</div>
+    <nav class="menu">
+      <a routerLink="profileagent" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Profil</a>
+      <!-- <a  routerLink="comptes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Mes Comptes bancaires</a> -->
+  <a  routerLink="demandesrecues" routerLinkActive="active">Demandes Recues</a>
+      <a routerLink="historique" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Historique</a>
+    </nav>
+    <button class="logout-btn" type="button" (click)="logout()">🚪 Déconnexion</button>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

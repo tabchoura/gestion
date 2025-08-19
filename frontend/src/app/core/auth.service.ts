@@ -12,6 +12,8 @@ export interface User {
   prenom: string;
   email: string;
   role: string;
+  numCin?: string;
+  numCompteBancaire?: string;
 }
 
 export interface LoginRequest {
@@ -28,12 +30,15 @@ export interface LoginResponse {
   message: string;
 }
 
+// ✅ Fixed RegisterPayload to include new fields
 export interface RegisterPayload {
   role: string;
   nom: string;
   prenom: string;
   email: string;
   password: string;
+  numCin: string;
+  numCompteBancaire: string;
 }
 
 export interface RegisterResponse {

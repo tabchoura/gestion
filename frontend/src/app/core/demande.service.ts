@@ -2,27 +2,28 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../.././environments/environment.development';
 
-// ===== Interfaces =====
+/* ====== Modèles ====== */
 export interface Compte {
   id: number;
-  banque: string;
+  typeCompte: string;
   numeroCompte: string;
   devise: string;
-  solde?: number;
+  isDefault?: boolean;
 }
+
+export type DemandeStatut = 'EN_ATTENTE' | 'APPROUVEE' | 'REJETEE' | 'ANNULEE';
 
 export interface DemandeChequier {
   id: number;
-  compteId: number;
-  banque?: string;
+  compte?: Compte;
   numeroCompte?: string;
   devise?: string;
   dateDemande: string | Date;
   pages: number;
-  motif?: string | null; // <- accepte null
-  statut: 'EN_ATTENTE' | 'APPROUVEE' | 'REJETEE' | 'ANNULEE';
+  motif?: string | null;
+  statut: DemandeStatut;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -31,41 +32,34 @@ export interface CreateDemandePayload {
   compteId: number;
   dateDemande: string; // yyyy-MM-dd
   pages: number;
-  motif?: string | null; // <- accepte null
+  motif?: string | null;
 }
 
 export interface UpdateDemandePayload {
   dateDemande?: string; // yyyy-MM-dd
   pages?: number;
-  motif?: string | null; // <- accepte null
+  motif?: string | null;
 }
 
-// ===== Service =====
+/* ====== Service ====== */
 @Injectable({ providedIn: 'root' })
 export class DemandesService {
   private http = inject(HttpClient);
-  private api = environment.apiUrl.replace(/\/+$/, ''); // Remove trailing slashes
+  private api = environment.apiUrl.replace(/\/+$/, ''); // trim trailing slash
 
-  // ===== Headers avec token =====
   private getHttpHeaders(): HttpHeaders {
-    const token = this.getToken();
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
     });
     if (token) headers = headers.set('Authorization', `Bearer ${token}`);
     return headers;
   }
 
-  private getToken(): string | null {
-    return sessionStorage.getItem('token') || localStorage.getItem('token');
-  }
-
-  // ===== Gestion des erreurs =====
   private handleError = (error: HttpErrorResponse) => {
     const body = error.error;
-    const serverMsg =
-      (body && (body.message || body.error_description || body.error)) || null;
+    const serverMsg = (body && (body.message || body.error_description || body.error)) || null;
 
     let errorMessage = serverMsg || 'Une erreur est survenue';
     if (!serverMsg) {
@@ -78,52 +72,65 @@ export class DemandesService {
     return throwError(() => new Error(errorMessage));
   };
 
-  // ===== API Calls =====
+  /* ---- Comptes ---- */
   getMesComptes(): Observable<Compte[]> {
-    return this.http.get<Compte[]>(`${this.api}/comptes`, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .get<Compte[]>(`${this.api}/comptes`, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
+  /* ---- Demandes (client) ---- */
   getMesDemandes(): Observable<DemandeChequier[]> {
-    return this.http.get<DemandeChequier[]>(`${this.api}/demandes`, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .get<DemandeChequier[]>(`${this.api}/demandes`, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
   getDemandesByCompte(compteId: number): Observable<DemandeChequier[]> {
-    return this.http.get<DemandeChequier[]>(`${this.api}/demandes?compteId=${compteId}`, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .get<DemandeChequier[]>(`${this.api}/demandes?compteId=${compteId}`, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
   creerDemande(payload: CreateDemandePayload): Observable<DemandeChequier> {
-    return this.http.post<DemandeChequier>(`${this.api}/demandes`, payload, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .post<DemandeChequier>(`${this.api}/demandes`, payload, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
   modifierDemande(id: number, payload: UpdateDemandePayload): Observable<DemandeChequier> {
-    return this.http.put<DemandeChequier>(`${this.api}/demandes/${id}`, payload, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .put<DemandeChequier>(`${this.api}/demandes/${id}`, payload, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
   annulerDemande(id: number): Observable<DemandeChequier> {
-    return this.http.put<DemandeChequier>(`${this.api}/demandes/${id}/annuler`, {}, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .put<DemandeChequier>(`${this.api}/demandes/${id}/annuler`, {}, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
   supprimerDemande(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/demandes/${id}`, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .delete<void>(`${this.api}/demandes/${id}`, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
-  getDemande(id: number): Observable<DemandeChequier> {
-    return this.http.get<DemandeChequier>(`${this.api}/demandes/${id}`, {
-      headers: this.getHttpHeaders()
-    }).pipe(catchError(this.handleError));
+  /* ---- Demandes (Agent/Admin) ---- */
+  getToutesLesDemandes(): Observable<DemandeChequier[]> {
+    return this.http
+      .get<DemandeChequier[]>(`${this.api}/demandes/all`, { headers: this.getHttpHeaders() })
+      .pipe(catchError(this.handleError));
+  }
+
+  // ✅ Envoie le statut en query param (comme Postman) → évite le 400
+  changerStatutDemande(id: number, statut: DemandeStatut): Observable<DemandeChequier> {
+    return this.http
+      .put<DemandeChequier>(
+        `${this.api}/demandes/${id}/statut`,
+        null, // pas de body
+        { headers: this.getHttpHeaders(), params: { statut } } // ?statut=APPROUVEE/REJETEE
+      )
+      .pipe(catchError(this.handleError));
   }
 }

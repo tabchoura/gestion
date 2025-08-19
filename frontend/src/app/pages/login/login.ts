@@ -91,7 +91,7 @@ export class LoginComponent implements OnInit {
   private redirectByRole(role: 'CLIENT' | 'AGENT' | 'ADMIN' | null) {
     const map: Record<'CLIENT' | 'AGENT' | 'ADMIN', string> = {
       CLIENT: '/dashboardclient/profile',
-      AGENT:  '/dashboardagent',
+      AGENT:  '/dashboardagent/profileagent',
       ADMIN:  '/dashboardadmin'
     };
 
