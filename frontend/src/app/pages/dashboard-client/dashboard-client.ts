@@ -16,8 +16,8 @@ export class DashboardClientComponent
 
 logout() {
   localStorage.removeItem('token');
-  sessionStorage.removeItem('token');  // au cas où tu l’as stocké là
-  this.router.navigate(['/login'], { replaceUrl: true }); // redirige sans retour possible
+  sessionStorage.removeItem('token');  
+  this.router.navigate(['/login'], { replaceUrl: true }); 
 }
 
 }

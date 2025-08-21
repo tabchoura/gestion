@@ -38,7 +38,6 @@ public class UserController {
         this.historiqueRepo = historiqueRepo;
     }
 
-    /* ------------------------- Helpers ------------------------- */
 
     private void log(User u, String action, String message, String page) {
         if (u == null) return;
@@ -46,7 +45,8 @@ public class UserController {
         h.setAction(action);
         h.setMessage(message);
         h.setPage(page);
-        h.setActeurId(u.getId());
+h.setActeur(u);                    // ✅ relation ManyToOne vers User
+
         h.setActeurEmail(u.getEmail());
         historiqueRepo.save(h);
     }
@@ -88,34 +88,34 @@ public class UserController {
         return ResponseEntity.ok(userMap(me));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
+    // @PostMapping("/register")
+    // public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
 
-        String nom = trimToNull(body.get("nom"));
-        String prenom = trimToNull(body.get("prenom"));
-        String email = trimToNull(body.get("email"));
-        String password = trimToNull(body.get("password"));
-        String numCin = trimToNull(body.get("numCin"));
-        String numCompteBancaire = trimToNull(body.get("numCompteBancaire"));
+    //     String nom = trimToNull(body.get("nom"));
+    //     String prenom = trimToNull(body.get("prenom"));
+    //     String email = trimToNull(body.get("email"));
+    //     String password = trimToNull(body.get("password"));
+    //     String numCin = trimToNull(body.get("numCin"));
+    //     String numCompteBancaire = trimToNull(body.get("numCompteBancaire"));
 
-        if (nom == null || prenom == null || email == null || password == null || numCin == null || numCompteBancaire == null)
-            return bad("Tous les champs sont obligatoires.");
+    //     if (nom == null || prenom == null || email == null || password == null || numCin == null || numCompteBancaire == null)
+    //         return bad("Tous les champs sont obligatoires.");
 
-        if (!EMAIL_RX.matcher(email).matches()) return bad("Email invalide.");
-        if (!numCin.matches("^[0-9]{8}$")) return bad("CIN invalide (8 chiffres).");
-        if (!numCompteBancaire.matches("^[0-9]{10,20}$")) return bad("Compte bancaire invalide (10 à 20 chiffres).");
+    //     if (!EMAIL_RX.matcher(email).matches()) return bad("Email invalide.");
+    //     if (!numCin.matches("^[0-9]{8}$")) return bad("CIN invalide (8 chiffres).");
+    //     if (!numCompteBancaire.matches("^[0-9]{10,20}$")) return bad("Compte bancaire invalide (10 à 20 chiffres).");
 
-        if (users.existsByEmail(email)) return bad("Email déjà utilisé.");
-        if (users.existsByNumCin(numCin)) return bad("CIN déjà utilisé.");
-        if (users.existsByNumCompteBancaire(numCompteBancaire)) return bad("Compte bancaire déjà utilisé.");
+    //     if (users.existsByEmail(email)) return bad("Email déjà utilisé.");
+    //     if (users.existsByNumCin(numCin)) return bad("CIN déjà utilisé.");
+    //     if (users.existsByNumCompteBancaire(numCompteBancaire)) return bad("Compte bancaire déjà utilisé.");
 
-        User u = new User(nom, prenom, email, passwordEncoder.encode(password), Role.CLIENT, numCin, numCompteBancaire);
-        users.save(u);
+    //     User u = new User(nom, prenom, email, passwordEncoder.encode(password), Role.CLIENT, numCin, numCompteBancaire);
+    //     users.save(u);
 
-        log(u, "REGISTER", "Nouvel utilisateur créé", "register");
+    //     log(u, "REGISTER", "Nouvel utilisateur créé", "register");
 
-        return ResponseEntity.ok(Map.of("message", "Utilisateur créé avec succès", "user", userMap(u)));
-    }
+    //     return ResponseEntity.ok(Map.of("message", "Utilisateur créé avec succès", "user", userMap(u)));
+    // }
 
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> body,

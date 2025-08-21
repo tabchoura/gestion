@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet], // ✅ RouterLink retiré ici
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })

@@ -29,9 +29,7 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((err: HttpErrorResponse) => {
       if (err.status === 401 && isApiCall && !isAuthCall) {
-        // ❌ Ne pas effacer le token/role automatiquement ici
-        // ❌ Ne pas rediriger automatiquement
-        // 👉 On laisse le composant décider (message, bouton Reconnecter)
+     
       }
       return throwError(() => err);
     })

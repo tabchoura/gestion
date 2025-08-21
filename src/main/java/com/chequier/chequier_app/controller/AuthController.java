@@ -54,10 +54,10 @@ public class AuthController {
     if (u == null || historiqueRepo == null) return;
     try {
       Historique h = new Historique();
-      h.setAction(action);                     // NOT NULL
-      h.setActeurId(u.getId());                // NOT NULL
-      h.setActeurEmail(u.getEmail());          // NOT NULL
-      // creeLe est géré par @PrePersist dans l'entité Historique
+    h.setActeur(u);                    
+h.setActeurEmail(u.getEmail());    
+h.setActeurRole(u.getRole()!=null? u.getRole().name(): null);
+
 
       // Optionnels mais utiles
       h.setActeurRole(u.getRole() != null ? u.getRole().name() : null);
@@ -81,7 +81,7 @@ public class AuthController {
     public String password;
     public Role role;                 // CLIENT (défaut) ou AGENT
     public String numCin;
-    public String numCompteBancaire;  // optionnel si AGENT
+    public String numCompteBancaire;  // ✅ MODIFIÉ: optionnel pour tous les rôles maintenant
   }
 
   public static class LoginBody {
@@ -118,30 +118,20 @@ public class AuthController {
       if (password == null) return ResponseEntity.badRequest().body(Map.of("error", "Le mot de passe est obligatoire"));
       if (numCin == null)   return ResponseEntity.badRequest().body(Map.of("error", "Le CIN est obligatoire"));
 
-      // Formats
       if (!email.contains("@"))
         return ResponseEntity.badRequest().body(Map.of("error", "Format d'email invalide"));
       if (!numCin.matches("^[0-9]{8}$"))
         return ResponseEntity.badRequest().body(Map.of("error", "Le CIN doit contenir exactement 8 chiffres"));
 
-      // Rôle
-      if (role == Role.CLIENT) {
-        if (numCompteBancaire == null)
-          return ResponseEntity.badRequest().body(Map.of("error", "Le compte bancaire est obligatoire pour un client"));
-        if (!numCompteBancaire.matches("^[0-9]{10,20}$"))
-          return ResponseEntity.badRequest().body(Map.of("error", "Le compte bancaire doit contenir entre 10 et 20 chiffres"));
-      } else if (role == Role.AGENT) {
-        if (numCompteBancaire != null && !numCompteBancaire.matches("^[0-9]{10,20}$"))
-          return ResponseEntity.badRequest().body(Map.of("error", "Le compte bancaire doit contenir entre 10 et 20 chiffres"));
+      if (numCompteBancaire != null && !numCompteBancaire.matches("^[0-9]{10,20}$")) {
+        return ResponseEntity.badRequest().body(Map.of("error", "Le compte bancaire doit contenir entre 10 et 20 chiffres"));
       }
 
-      // Vérifications d'unicité - avec protection contre null
       if (users.existsByEmail(email))
         return ResponseEntity.badRequest().body(Map.of("error", "Email déjà utilisé"));
       if (users.existsByNumCin(numCin))
         return ResponseEntity.badRequest().body(Map.of("error", "CIN déjà utilisé"));
       
-      // Pour le compte bancaire, vérifier seulement s'il n'est pas null
       if (numCompteBancaire != null && users.existsByNumCompteBancaire(numCompteBancaire))
         return ResponseEntity.badRequest().body(Map.of("error", "Compte bancaire déjà utilisé"));
 

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService, type LoginRequest, type LoginResponse } from '../../core/auth.service';
+import { ToastrService } from 'ngx-toastr'; // ✅ import du service
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toastr = inject(ToastrService); // ✅ injection du service
 
   year = new Date().getFullYear();
   loading = false;
@@ -40,13 +42,8 @@ export class LoginComponent implements OnInit {
 
     const v = this.form.value;
 
-    // Normaliser l'email
     const email = (v.email ?? '').toString().normalize('NFKC').trim().toLowerCase();
-
-    const payload: LoginRequest = {
-      email,
-      password: v.password!
-    };
+    const payload: LoginRequest = { email, password: v.password! };
 
     this.loading = true;
     this.auth.login(payload)
@@ -58,7 +55,6 @@ export class LoginComponent implements OnInit {
 
           if (role) localStorage.setItem('role', role);
 
-          // "remember": bascule token/user vers sessionStorage si décoché
           if (!v.remember) {
             const token = localStorage.getItem('token');
             const user  = localStorage.getItem('user');
@@ -68,6 +64,18 @@ export class LoginComponent implements OnInit {
             if (roleS) { sessionStorage.setItem('role',  roleS);  localStorage.removeItem('role');  }
           }
 
+          // ✅ toast succès
+this.toastr.success(
+  'Bienvenue dans ton espace 🎉',
+  'Connexion réussie',
+  {
+    timeOut: 5000,          // ⏳ 5 secondes au lieu de 3
+positionClass: 'toast-top-right',
+    progressBar: true,      // ✅ barre de progression
+    closeButton: true,      // ❌ bouton fermer
+    easing: 'ease-in',      // animation
+  }
+);
           this.redirectByRole(role);
         },
         error: (err) => {
@@ -77,7 +85,18 @@ export class LoginComponent implements OnInit {
           else if (err?.status === 500)  msg = 'Erreur serveur. Réessayez plus tard';
           else if (err?.error?.message)  msg = err.error.message;
           this.serverError = msg;
-        }
+
+          // ✅ toast erreur
+this.toastr.error(
+  'Email ou mot de passe incorrect',
+  'Erreur de connexion',
+  {
+    timeOut: 8000,
+positionClass: 'toast-top-right',
+    progressBar: true,
+    closeButton: true,
+  }
+);        }
       });
   }
 
@@ -94,13 +113,11 @@ export class LoginComponent implements OnInit {
       AGENT:  '/dashboardagent/profileagent',
       ADMIN:  '/dashboardadmin'
     };
-
     const target = role ? map[role] : null;
     if (target) this.router.navigateByUrl(target);
     else this.router.navigateByUrl('/');
   }
 
-  // Helpers template
   get emailErrors() {
     const c = this.form.get('email');
     if (c?.errors && c.touched) {

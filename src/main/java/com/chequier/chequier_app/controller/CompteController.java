@@ -145,29 +145,29 @@ public class CompteController {
     }
 
     // Définir un compte par défaut
-    @PutMapping("/{id}/default")
-    public ResponseEntity<?> setDefault(Authentication auth, @PathVariable Long id) {
-        try {
-            User u = current(auth);
-            var c = comptes.findById(id).orElse(null);
-            if (c == null || !Objects.equals(c.getUser().getId(), u.getId()))
-                return ResponseEntity.notFound().build();
+    // @PutMapping("/{id}/default")
+    // public ResponseEntity<?> setDefault(Authentication auth, @PathVariable Long id) {
+    //     try {
+    //         User u = current(auth);
+    //         var c = comptes.findById(id).orElse(null);
+    //         if (c == null || !Objects.equals(c.getUser().getId(), u.getId()))
+    //             return ResponseEntity.notFound().build();
 
-            comptes.findByUserId(u.getId()).stream()
-                    .filter(CompteBancaire::isDefault)
-                    .forEach(x -> {
-                        x.setDefault(false);
-                        comptes.save(x);
-                    });
+    //         comptes.findByUserId(u.getId()).stream()
+    //                 .filter(CompteBancaire::isDefault)
+    //                 .forEach(x -> {
+    //                     x.setDefault(false);
+    //                     comptes.save(x);
+    //                 });
 
-            c.setDefault(true);
-            return ResponseEntity.ok(sanitize(comptes.save(c)));
+    //         c.setDefault(true);
+    //         return ResponseEntity.ok(sanitize(comptes.save(c)));
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Erreur lors du changement de compte par défaut: " + e.getMessage());
-        }
-    }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         return ResponseEntity.status(500).body("Erreur lors du changement de compte par défaut: " + e.getMessage());
+    //     }
+    // }
 
     // Suppression d'un compte
     @DeleteMapping("/{id}")

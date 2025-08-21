@@ -1,59 +1,73 @@
 package com.chequier.chequier_app.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Entity @Table(name = "historique")
+@Entity
+@Table(name = "historique")
+@Getter @Setter @NoArgsConstructor
 public class Historique {
+
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false, length = 80)
-  private String action;           // ex: LOGIN, DEMANDE_CREE, ...
+  private String action;
 
   @Column(length = 255)
-  private String message;          // ex: "Demande #12"
+  private String message;
 
-  private String page;             // ex: "login", "demandes", "profil"
-  private String ressourceType;    // ex: "DEMANDE"
-  private String ressourceLabel;   // ex: "Chéquier courant"
-  private String ressourceId;      // ex: "12"
+  private String page;
+  private String ressourceType;
+  private String ressourceLabel;
+  private String ressourceId;
 
-  @Column(nullable = false)
-  private Long acteurId;
+  // --- relations ---
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "acteur_id", nullable = false)
+  @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+  private User acteur;
 
-  @Column(nullable = false)
-  private String acteurEmail;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "demande_id")
+  @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+  private DemandeChequier demande;
 
-  private String acteurRole;       // optionnel
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "compte_id")
+  @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+  private CompteBancaire compte;
+
+  // copies audit (facultatif mais utile)
+  @Column(nullable = false) private String acteurEmail;
+  private String acteurRole;
 
   @Column(nullable = false)
   private LocalDateTime creeLe;
 
   @PrePersist
-  public void prePersist() { if (creeLe == null) creeLe = LocalDateTime.now(); }
+  public void prePersist() {
+    if (creeLe == null) creeLe = LocalDateTime.now();
+    if (acteur != null) {
+      if (acteurEmail == null) acteurEmail = acteur.getEmail();
+      if (acteurRole == null && acteur.getRole() != null) acteurRole = acteur.getRole().name();
+    }
+  }
 
-  // Getters/Setters
-  // ...
-  public Long getId() { return id; }
-  public String getAction() { return action; }
-  public void setAction(String action) { this.action = action; }
-  public String getMessage() { return message; }
-  public void setMessage(String message) { this.message = message; }
-  public String getPage() { return page; }
-  public void setPage(String page) { this.page = page; }
-  public String getRessourceType() { return ressourceType; }
-  public void setRessourceType(String ressourceType) { this.ressourceType = ressourceType; }
-  public String getRessourceLabel() { return ressourceLabel; }
-  public void setRessourceLabel(String ressourceLabel) { this.ressourceLabel = ressourceLabel; }
-  public String getRessourceId() { return ressourceId; }
-  public void setRessourceId(String ressourceId) { this.ressourceId = ressourceId; }
-  public Long getActeurId() { return acteurId; }
-  public void setActeurId(Long acteurId) { this.acteurId = acteurId; }
-  public String getActeurEmail() { return acteurEmail; }
-  public void setActeurEmail(String acteurEmail) { this.acteurEmail = acteurEmail; }
-  public String getActeurRole() { return acteurRole; }
-  public void setActeurRole(String acteurRole) { this.acteurRole = acteurRole; }
-  public LocalDateTime getCreeLe() { return creeLe; }
-  public void setCreeLe(LocalDateTime creeLe) { this.creeLe = creeLe; }
+  // constructeur pratique
+  public Historique(String action, String message, String page,
+                    String ressourceType, String ressourceLabel, String ressourceId,
+                    User acteur, DemandeChequier demande, CompteBancaire compte) {
+    this.action = action;
+    this.message = message;
+    this.page = page;
+    this.ressourceType = ressourceType;
+    this.ressourceLabel = ressourceLabel;
+    this.ressourceId = ressourceId;
+    this.acteur = acteur;
+    this.demande = demande;
+    this.compte = compte;
+  }
 }

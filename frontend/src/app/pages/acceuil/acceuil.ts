@@ -26,19 +26,16 @@ export class AccueilComponent {
     { note: 5, text: 'Je recommande', name: 'Amel' }
   ];
 
-  // Méthode pour naviguer vers la page de connexion
   navigateToLogin() {
     console.log('Navigation vers /login'); 
     this.router.navigate(['/login']);
   }
 
-  // Méthode pour naviguer vers la page d'inscription
   navigateToRegister() {
     console.log('Navigation vers /register'); 
     this.router.navigate(['/register']);
   }
 
-  // Méthode générique pour la navigation
   go(path: string) {
     console.log(`Navigation vers ${path}`); 
     this.router.navigateByUrl(path);

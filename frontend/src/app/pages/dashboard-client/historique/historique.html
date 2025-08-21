@@ -1,25 +1,21 @@
-<div class="historique-container">
-  <h2>Mon Historique</h2>
+<div class="wrap historique-container">
+  <h2>📜 Mon Historique</h2>
 
-  <!-- Message d'erreur -->
   <div *ngIf="errorMsg()" class="error">
     {{ errorMsg() }}
   </div>
 
-  <!-- Boutons d'action -->
-  <div class="actions">
-    <button (click)="load()" [disabled]="loading()">
-      {{ loading() ? 'Chargement...' : 'Actualiser' }}
-    </button>
+  <div class="actions-header">
+    <!-- <button class="btn light" (click)="load()" [disabled]="loading()">
+      {{ loading() ? '⏳ Chargement...' : '🔄 Actualiser' }}
+    </button> -->
   </div>
 
-  <!-- Loading -->
   <div *ngIf="loading()" class="loading">
-    Chargement...
+    ⏳ Chargement en cours...
   </div>
 
-  <!-- Liste -->
-  <div *ngIf="!loading()" class="history-list">
+  <div *ngIf="!loading()" class="card history-list">
     <div *ngIf="historique().length === 0" class="empty">
       Aucun historique trouvé.
     </div>
@@ -40,15 +36,15 @@
 
         <div class="meta">
           <span class="email" title="Utilisateur">
-            {{ item.acteurEmail }}
+            👤 {{ item.acteurEmail }}
           </span>
 
           <span *ngIf="item.page" class="page" title="Page">
-            • {{ item.page }}
+            • 📄 {{ item.page }}
           </span>
 
           <span *ngIf="item.ressourceType || item.ressourceLabel || item.ressourceId" class="resource">
-            • {{ item.ressourceType || 'Ressource' }}
+            • 🗂️ {{ item.ressourceType || 'Ressource' }}
             <ng-container *ngIf="item.ressourceLabel">: {{ item.ressourceLabel }}</ng-container>
             <ng-container *ngIf="item.ressourceId"> (#{{ item.ressourceId }})</ng-container>
           </span>

@@ -1,4 +1,3 @@
-// src/app/pages/register/register.ts
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -12,8 +11,7 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../core/auth.service';
-
-// ✅ Interface mise à jour pour le payload d'inscription
+import { ToastrService } from 'ngx-toastr';
 export interface RegisterPayload {
   role: string;
   nom: string;
@@ -21,7 +19,6 @@ export interface RegisterPayload {
   email: string;
   password: string;
   numCin: string;
-  numCompteBancaire?: string; // ✅ Optionnel maintenant
 }
 
 @Component({
@@ -32,6 +29,8 @@ export interface RegisterPayload {
   styleUrls: ['./register.css']
 })
 export class RegisterComponent {
+    private toastr = inject(ToastrService);
+
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -42,15 +41,12 @@ export class RegisterComponent {
   loading = false;
   serverError = '';
 
-  // ✅ Regex pour mot de passe fort
+  // Regex pour mot de passe fort
   private readonly passwordPattern =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
 
-  // ✅ Regex pour CIN (8 chiffres exactement)
+  // Regex pour CIN (exactement 8 chiffres)
   private readonly cinPattern = /^[0-9]{8}$/;
-
-  // ✅ Regex pour numéro de compte bancaire (10-20 chiffres)
-  private readonly comptePattern = /^[0-9]{10,20}$/;
 
   form = this.fb.group(
     {
@@ -58,7 +54,6 @@ export class RegisterComponent {
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prenom: ['', [Validators.required, Validators.minLength(2)]],
       numCin: ['', [Validators.required, Validators.pattern(this.cinPattern)]],
-      numCompteBancaire: [''], // ✅ Pas de validators par défaut, sera géré dynamiquement
       email: ['', [Validators.required, Validators.email]],
       password: [
         '',
@@ -73,44 +68,18 @@ export class RegisterComponent {
     { validators: [RegisterComponent.passwordsMatch] }
   );
 
-  // ✅ Getters pour tous les champs
+  // Getters
   get role() { return this.form.get('role'); }
   get nom() { return this.form.get('nom'); }
   get prenom() { return this.form.get('prenom'); }
   get numCin() { return this.form.get('numCin'); }
-  get numCompteBancaire() { return this.form.get('numCompteBancaire'); }
   get email() { return this.form.get('email'); }
   get password() { return this.form.get('password'); }
   get confirmPassword() { return this.form.get('confirmPassword'); }
 
-  constructor() {
-    // ✅ Observer les changements de rôle pour ajuster la validation
-    this.role?.valueChanges.subscribe(roleValue => {
-      this.updateAccountNumberValidation(roleValue || '');
-    });
-  }
+ 
 
-  // ✅ Méthode pour ajuster la validation du compte bancaire selon le rôle
-  private updateAccountNumberValidation(role: string) {
-    const accountControl = this.numCompteBancaire;
-    
-    if (role === 'CLIENT') {
-      // Pour les clients : champ requis avec pattern
-      accountControl?.setValidators([
-        Validators.required, 
-        Validators.pattern(this.comptePattern)
-      ]);
-    } else {
-      // Pour les agents : pas de validation (champ optionnel et caché)
-      accountControl?.clearValidators();
-      accountControl?.setValue(''); // Vider le champ
-    }
-    
-    // Mettre à jour la validation
-    accountControl?.updateValueAndValidity();
-  }
-
-  // ✅ Validator statique pour la correspondance des mots de passe
+  // Validator pour correspondance des mots de passe
   private static passwordsMatch(group: AbstractControl): ValidationErrors | null {
     const password = group.get('password')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
@@ -119,6 +88,18 @@ export class RegisterComponent {
       return { passwordMismatch: true };
     }
     return null;
+  }
+
+  onCinInput(event: any) {
+    const input = event.target;
+    const value = input.value;
+    const numericValue = value.replace(/[^0-9]/g, '');
+    const limitedValue = numericValue.substring(0, 8);
+    
+    if (value !== limitedValue) {
+      input.value = limitedValue;
+      this.form.get('numCin')?.setValue(limitedValue);
+    }
   }
 
   submit() {
@@ -135,7 +116,6 @@ export class RegisterComponent {
         nom: this.nom?.errors,
         prenom: this.prenom?.errors,
         numCin: this.numCin?.errors,
-        numCompteBancaire: this.numCompteBancaire?.errors,
         email: this.email?.errors,
         password: this.password?.errors,
         confirmPassword: this.confirmPassword?.errors
@@ -143,28 +123,20 @@ export class RegisterComponent {
       return;
     }
 
-    // ✅ CORRECTION PRINCIPALE: Préparer les données selon le rôle
     const { confirmPassword, ...formData } = this.form.value;
     
-    // ✅ Créer le payload final en excluant numCompteBancaire pour les agents
-    let registerData: any = {
-      role: formData.role,
-      nom: formData.nom,
-      prenom: formData.prenom,
-      numCin: formData.numCin,
-      email: formData.email,
-      password: formData.password
+    const registerData: RegisterPayload = {
+      role: formData.role!,
+      nom: formData.nom!,
+      prenom: formData.prenom!,
+      numCin: formData.numCin!,
+      email: formData.email!,
+      password: formData.password!
     };
-    
-    // ✅ N'ajouter numCompteBancaire QUE pour les clients
-    if (formData.role === 'CLIENT' && formData.numCompteBancaire) {
-      registerData.numCompteBancaire = formData.numCompteBancaire;
-    }
     
     console.log('📤 Données à envoyer:', { 
       ...registerData, 
-      password: '***',
-      numCompteBancaire: registerData.numCompteBancaire ? registerData.numCompteBancaire.substring(0, 4) + '***' : undefined
+      password: '***'
     });
 
     this.loading = true;
@@ -172,15 +144,14 @@ export class RegisterComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (response) => {
+                    this.toastr.success('Inscription réussie 🎉', 'Succès');
+
           console.log('✅ Inscription réussie:', response);
           
-          // ✅ Gestion sécurisée de la réponse
           if (response.token && response.user) {
-            // Si le backend retourne token + user, l'utilisateur est connecté automatiquement
             console.log('✅ Connexion automatique après inscription');
             this.redirectByRole(response.user.role);
           } else {
-            // Sinon, rediriger vers login avec message de succès
             console.log('✅ Inscription réussie, redirection vers login');
             this.router.navigate(['/login'], {
               queryParams: { message: 'Inscription réussie ! Veuillez vous connecter.' }
@@ -189,16 +160,27 @@ export class RegisterComponent {
         },
         error: (err: HttpErrorResponse) => {
           console.error('❌ Erreur inscription:', err);
+                    this.toastr.error(this.serverError, 'Erreur');
+
+          console.error('❌ Détails de l\'erreur:', {
+            status: err.status,
+            statusText: err.statusText,
+            url: err.url,
+            error: err.error,
+            message: err.message
+          });
           
-          // ✅ Gestion d'erreurs plus précise
           if (err.error?.message) {
             this.serverError = err.error.message;
           } else if (err.error?.error) {
             this.serverError = err.error.error;
+          } else if (err.error?.details) {
+            this.serverError = Array.isArray(err.error.details) 
+              ? err.error.details.join(', ')
+              : err.error.details;
           } else {
             switch (err.status) {
               case 400:
-                // Gestion spécifique pour les nouveaux champs
                 if (err.error?.error?.includes('CIN')) {
                   this.serverError = 'Ce numéro CIN est déjà utilisé.';
                 } else if (err.error?.error?.includes('compte')) {
@@ -224,12 +206,11 @@ export class RegisterComponent {
       });
   }
 
-  // ✅ Redirection selon le rôle
   private redirectByRole(role: string) {
     switch (role.toUpperCase()) {
-       case 'ADMIN':
-         this.router.navigate(['/login']);
-         break;
+      case 'ADMIN':
+        this.router.navigate(['/login']);
+        break;
       case 'AGENT':
         this.router.navigate(['/login']);
         break;
@@ -239,4 +220,4 @@ export class RegisterComponent {
         break;
     }
   }
-} 
+}

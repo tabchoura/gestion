@@ -66,8 +66,8 @@ public class DemandeController {
                 h.setAction(action);
                 h.setMessage(message);
                 h.setPage(page);
-                h.setActeurId(u.getId());
-                h.setActeurEmail(u.getEmail());
+h.setActeur(u);                    // ✅ relation ManyToOne vers User
+
                 historiqueRepo.save(h);
             }
         } catch (Exception e) {

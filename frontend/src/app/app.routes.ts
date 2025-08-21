@@ -47,9 +47,7 @@ export const routes: Routes = [
        { path: 'historique',            loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) }
     //   { path: 'historique/:type/:id',  loadComponent: () => import('./pages/dashboard-client/historique/historique').then(m => m.HistoriqueComponent) },
 
-    //   // Alias si ton menu pointe sur "historiques"
-    //   { path: 'historiques', pathMatch: 'full', redirectTo: 'historique' },
-    // ]
+    
   ]  },
 ];
   

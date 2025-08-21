@@ -12,8 +12,19 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 export class DashboardAgentComponent {
   constructor(private router: Router) {}
 
-  logout() {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
-  }
+ logout() {
+  // 🔑 Nettoyer localStorage
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('role');
+
+  // 🔑 Nettoyer sessionStorage aussi (si remember = false)
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+  sessionStorage.removeItem('role');
+
+  // 🔑 Redirection vers login
+  this.router.navigate(['/login']);
+}
+
 }

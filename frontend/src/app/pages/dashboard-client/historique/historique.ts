@@ -1,4 +1,3 @@
-// src/app/pages/dashboard-client/historique/historique.ts
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HistoriqueService, Historique } from '../../../core/historique.service';
@@ -55,7 +54,6 @@ export class HistoriqueComponent implements OnInit {
     });
   }
 
-  // === Manque précédemment : méthodes utilisées par le template ===
   actionLabel(action: string): string {
     const map: Record<string, string> = {
       LOGIN: 'Connexion',
@@ -87,7 +85,6 @@ export class HistoriqueComponent implements OnInit {
       default: return `${this.actionLabel(item.action)} à ${heure}.`;
     }
   }
-  // === fin des méthodes manquantes ===
 
   // Test de log depuis le composant
   testLog() {

@@ -1,121 +1,127 @@
-<!-- En-tête -->
-<div class="card header">
-  <div class="title">
-    <i class="ri-booklet-line"></i>
-    Mes Demandes de Chéquier
+<div class="wrap">
+  <!-- Titre principal -->
+  <h2>
+    📋 Mes Demandes de Chéquier
+  </h2>
+
+  <!-- Retour -->
+  <div class="actions-header">
+    <!-- <button class="btn light" routerLink="/dashboardclient/comptes">
+      <i class="ri-arrow-left-line"></i> Retour aux Comptes
+    </button> -->
   </div>
-  <button class="btn light" routerLink="/dashboardclient/comptes">
-    <i class="ri-arrow-left-line"></i> Retour aux Comptes
-  </button>
-</div>
 
-<!-- Liste + Actions -->
-<div class="card list">
-  <div class="list-header">
-    <div class="title small"></div>
-
-    <div class="inline">
-      <!-- Sélecteur de compte pour filtrer -->
+  <!-- Section filtres et actions -->
+  <div class="filters-actions-section">
+    <div class="account-filter">
+      <label>Compte :</label>
       <select [ngModel]="compteIdSel()" (ngModelChange)="onSelectCompte($event)">
-        <option [ngValue]="null" disabled>— Choisir un compte —</option>
+        <option [ngValue]="null" disabled selected>— Choisir un compte —</option>
         <option *ngFor="let c of comptes" [ngValue]="c.id">
           {{ c.typeCompte }} — {{ c.numeroCompte }} ({{ c.devise || '—' }})
         </option>
       </select>
-
-      <button class="btn success" (click)="openModal()" [disabled]="!compteIdSel()">
-        <i class="ri-add-line"></i> Nouvelle Demande
-      </button>
     </div>
-  </div>
-
-  <table class="table" *ngIf="demandes?.length; else empty">
-    <thead>
-      <tr>
-        <th>Date Demande</th>
-        <th>Pages</th>
-        <th>Motif</th>
-        <th>Type Compte</th>
-        <th>Statut</th>
-        <th class="actions">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let d of demandes">
-        <td>{{ d.dateDemande | date:'dd/MM/yyyy' }}</td>
-        <td>{{ d.pages }}</td>
-        <td>{{ d.motif || '—' }}</td>
-        <td>{{ d.compte?.typeCompte || '—' }}</td>
-        <td><span [class]="badgeClass(d.statut)">{{ d.statut.replace('_',' ') }}</span></td>
-        <td class="actions">
-          <button class="icon blue" title="Modifier" (click)="modifier(d)">
-            <i class="ri-edit-2-line">✏</i>
-          </button>
-
-          <button class="icon dark" title="Annuler" *ngIf="d.statut==='EN_ATTENTE'" (click)="annuler(d)">
-            <i class="ri-close-circle-line">❌</i>
-          </button>
-
-          <!-- <button class="icon red" title="Supprimer" (click)="supprimer(d)">
-            <i class="ri-delete-bin-line">🗑</i>
-          </button> -->
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <ng-template #empty>
-    <div class="empty" *ngIf="compteIdSel(); else noCompte">Aucune demande.</div>
-  </ng-template>
-  <ng-template #noCompte></ng-template>
-</div>
-
-<!-- Modale création / édition -->
-<div class="modal-backdrop" *ngIf="showModal()"></div>
-<div class="modal" *ngIf="showModal()">
-  <div class="modal-header">
-    <div class="title">
-      {{ editMode() ? 'Modifier la Demande' : 'Nouvelle Demande' }}
-    </div>
-    <button class="icon" (click)="closeModal()" aria-label="Fermer">
-      <i class="ri-close-line"></i>
+    <button class="btn-add" (click)="openModal()" [disabled]="!compteIdSel()">
+      ➕ Nouvelle Demande
     </button>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="modal-body">
-      <label>Compte *</label>
-<select [formControl]="compteCtrl">
-        <option *ngFor="let c of comptes" [value]="c.id">
-          {{ c.typeCompte }} — {{ c.numeroCompte }} ({{ c.devise || '—' }})
-        </option>
-      </select>
-
-      <label>Date de demande *</label>
-      <input type="date" formControlName="dateDemande" placeholder="jj/mm/aaaa">
-
-      <label>Nombre de pages *</label>
-      <select formControlName="pages">
-        <option [value]="10">10 pages</option>
-        <option [value]="25">25 pages</option>
-        <option [value]="50">50 pages</option>
-      </select>
-
-      <label>Motif (optionnel)</label>
-      <input type="text" formControlName="motif" placeholder="Ex: renouvellement, perte, ...">
+  <!-- Carte -->
+  <div class="card">
+    <!-- En-tête de la table -->
+    <div class="table thead">
+      <div>Date Demande</div>
+      <div>Pages</div>
+      <div>Motif</div>
+      <div>Type Compte</div>
+      <div>Statut</div>
+      <div>Actions</div>
     </div>
 
-    <div class="modal-footer">
-      <button type="button" class="btn light" (click)="closeModal()">Annuler</button>
-      <button type="submit"
-              class="btn"
-              [ngClass]="editMode() ? 'warning' : 'primary'"
-              [disabled]="form.invalid || submitting()">
-        {{ editMode() ? 'Enregistrer' : 'Créer' }}
+    <!-- Lignes -->
+    <div *ngIf="demandes?.length; else empty">
+      <div class="rowitem" *ngFor="let d of demandes">
+        <div>{{ d.dateDemande | date:'dd/MM/yyyy' }}</div>
+        <div>{{ d.pages }}</div>
+        <div>{{ d.motif || '—' }}</div>
+        <div>{{ d.compte?.typeCompte || '—' }}</div>
+        <div>
+          <span [class]="badgeClass(d.statut)">
+            {{ d.statut.replace('_',' ') }}
+          </span>
+        </div>
+        <div class="rowactions">
+          <button class="mini" (click)="modifier(d)">
+            ✏️ Modifier
+          </button>
+          <button class="mini warn" *ngIf="d.statut==='EN_ATTENTE'" (click)="annuler(d)">
+            ↩️ Annuler
+          </button>
+          <!-- <button class="mini danger" (click)="supprimer(d)">
+            🗑️ Supprimer
+          </button> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Aucun résultat -->
+    <ng-template #empty>
+      <div class="pad" *ngIf="compteIdSel(); else noCompte">
+        <span class="muted">Aucune demande.</span>
+      </div>
+    </ng-template>
+    <ng-template #noCompte></ng-template>
+  </div>
+
+  <!-- Modale -->
+  <div class="modal-backdrop" *ngIf="showModal()"></div>
+  <div class="modal" *ngIf="showModal()">
+    <div class="modal-header">
+      <div class="title">
+        {{ editMode() ? '✏️ Modifier la Demande' : '➕ Nouvelle Demande' }}
+      </div>
+      <button class="icon" (click)="closeModal()" aria-label="Fermer">
+        ❌
       </button>
     </div>
-  </form>
-</div>
 
-<div class="error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
-<div class="success" *ngIf="successMsg()">{{ successMsg() }}</div>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="modal-body">
+        <label>Compte *</label>
+        <select [formControl]="compteCtrl">
+          <option *ngFor="let c of comptes" [value]="c.id">
+            {{ c.typeCompte }} — {{ c.numeroCompte }} ({{ c.devise || '—' }})
+          </option>
+        </select>
+
+        <label>Date de demande *</label>
+        <input type="date" formControlName="dateDemande">
+
+        <label>Nombre de pages *</label>
+        <select formControlName="pages">
+          <option [value]="10">10 pages</option>
+          <option [value]="25">25 pages</option>
+          <option [value]="50">50 pages</option>
+        </select>
+
+        <label>Motif (optionnel)</label>
+        <input type="text" formControlName="motif" placeholder="Ex: renouvellement, perte, ...">
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn light" (click)="closeModal()">Annuler</button>
+        <button type="submit"
+                class="btn"
+                [ngClass]="editMode() ? 'warning' : 'primary'"
+                [disabled]="form.invalid || submitting()">
+          {{ editMode() ? 'Enregistrer' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Messages -->
+  <div class="error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+  <div class="success" *ngIf="successMsg()">{{ successMsg() }}</div>
+</div>

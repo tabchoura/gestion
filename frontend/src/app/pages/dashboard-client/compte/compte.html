@@ -2,7 +2,6 @@
   <h2>💳 Mes Comptes Bancaires</h2>
   <div class="card">
     <div class="table">
-      <!-- Entête -->
       <div class="thead">
         <div>Type de Compte</div>
         <div>N° Compte</div>
@@ -13,7 +12,6 @@
         </div>
       </div>
 
-      <!-- Formulaire inline ajout/édition -->
       <form *ngIf="isAdding() || isEditing()" [formGroup]="form" (ngSubmit)="submit()" class="inline-form">
         <select formControlName="typeCompte" required>
           <option value="" disabled>Sélectionner un type de compte *</option>
@@ -41,7 +39,6 @@
         </div>
       </form>
 
-      <!-- Lignes -->
       <div class="rowitem" *ngFor="let c of comptesFn()">
         <div>
           <b>{{ getTypeCompteLabel(c.typeCompte) }}</b> 
@@ -50,7 +47,7 @@
         <div>{{ c.numeroCompte }}</div>
         <div>{{ formatRib(c.rib) }}</div>
         <div class="rowactions">
-          <!-- 🔥 Bouton qui navigue vers /dashboardclient/demandes/:id -->
+
           <button type="button"
                   class="mini"
                   (click)="voirChequier(c, $event)"
@@ -63,7 +60,6 @@
         </div>
       </div>
 
-      <!-- États -->
       <div *ngIf="!loadingFn() && comptesFn().length === 0" class="muted pad">Aucun compte.</div>
       <div *ngIf="loadingFn()" class="muted pad">Chargement…</div>
     </div>

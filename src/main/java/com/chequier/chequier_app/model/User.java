@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -51,11 +50,9 @@ public class User {
   @Column(name = "num_cin", nullable = false, length = 8, unique = true)
   private String numCin;
 
-  // ✅ Optionnel pour AGENT (nullable = true) ; unique OK (plusieurs NULL autorisés en MySQL)
   @Column(name = "num_compte_bancaire", nullable = true, length = 20, unique = true)
   private String numCompteBancaire;
 
-  // Constructeur simplifié
   public User(String nom, String prenom, String email, String password, Role role) {
     this.nom = nom;
     this.prenom = prenom;
@@ -73,7 +70,7 @@ public class User {
     this.password = password;
     this.role = role;
     this.numCin = numCin;
-    this.numCompteBancaire = numCompteBancaire; // peut être null si AGENT
+    this.numCompteBancaire = numCompteBancaire; 
   }
 
   // Helpers optionnels

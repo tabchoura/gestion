@@ -1,85 +1,105 @@
-<div class="card">
-  <div class="head">
-    <h1>Mon profil</h1>
-    <button class="btn btn-ghost" type="button" (click)="toggleEdit()">
-      {{ editMode() ? 'Annuler' : 'Modifier' }}
-    </button>
-  </div>
+<div class="wrap">
+  <h2>👤 Mon Profil</h2>
+  <div class="card">
+    <!-- HEADER -->
+    <div class="thead">
+      <div>Détails</div>
+      <div class="thead-actions">
+        <button class="btn-add" type="button" (click)="toggleEdit()">
+          {{ editMode() ? 'Annuler' : 'Modifier' }}
+        </button>
+      </div>
+    </div>
 
-  <form class="profile-grid" [formGroup]="form" (ngSubmit)="save()">
-    <label class="field">
-      <span>Email</span>
-      <input formControlName="email" [readonly]="!editMode()" 
-             [class.invalid]="editMode() && email?.touched && email?.invalid">
-      <small class="error" *ngIf="editMode() && email?.touched && email?.hasError('required')">
-        Email requis.
-      </small>
-      <small class="error" *ngIf="editMode() && email?.touched && email?.hasError('email')">
-        Format d'email invalide.
-      </small>
-    </label>
+    <!-- FORMULAIRE PROFIL -->
+    <form class="inline-form profile-form" [formGroup]="form" (ngSubmit)="save()">
+      <div class="rowitem">
+        <div><b>Email</b></div>
+        <div>
+          <input formControlName="email"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && email?.touched && email?.invalid" />
+          <small class="error" *ngIf="editMode() && email?.touched && email?.hasError('required')">
+            Email requis.
+          </small>
+          <small class="error" *ngIf="editMode() && email?.touched && email?.hasError('email')">
+            Format invalide.
+          </small>
+        </div>
+      </div>
 
-    <label class="field">
-      <span>Nom</span>
-      <input formControlName="nom" [readonly]="!editMode()"
-             [class.invalid]="editMode() && nom?.touched && nom?.invalid">
-      <small class="error" *ngIf="editMode() && nom?.touched && nom?.invalid">
-        Nom requis (min. 2 caractères).
-      </small>
-    </label>
+      <div class="rowitem">
+        <div><b>Nom</b></div>
+        <div>
+          <input formControlName="nom"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && nom?.touched && nom?.invalid" />
+          <small class="error" *ngIf="editMode() && nom?.touched && nom?.invalid">
+            Nom requis.
+          </small>
+        </div>
+      </div>
 
-    <label class="field">
-      <span>Prénom</span>
-      <input formControlName="prenom" [readonly]="!editMode()"
-             [class.invalid]="editMode() && prenom?.touched && prenom?.invalid">
-      <small class="error" *ngIf="editMode() && prenom?.touched && prenom?.invalid">
-        Prénom requis (min. 2 caractères).
-      </small>
-    </label>
+      <div class="rowitem">
+        <div><b>Prénom</b></div>
+        <div>
+          <input formControlName="prenom"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && prenom?.touched && prenom?.invalid" />
+          <small class="error" *ngIf="editMode() && prenom?.touched && prenom?.invalid">
+            Prénom requis.
+          </small>
+        </div>
+      </div>
 
-    <!-- ✅ Nouveau champ : Numéro CIN -->
-    <label class="field">
-      <span>Numéro CIN</span>
-      <input formControlName="numCin" [readonly]="!editMode()" maxlength="8"
-             [class.invalid]="editMode() && numCin?.touched && numCin?.invalid">
-      <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('required')">
-        Numéro CIN requis.
-      </small>
-      <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('pattern')">
-        Le CIN doit contenir exactement 8 chiffres.
-      </small>
-    </label>
+      <div class="rowitem">
+        <div><b>Numéro CIN</b></div>
+        <div>
+          <input formControlName="numCin" maxlength="8"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && numCin?.touched && numCin?.invalid" />
+          <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('required')">
+            CIN requis.
+          </small>
+          <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('pattern')">
+            Doit contenir 8 chiffres.
+          </small>
+        </div>
+      </div>
 
-    <!-- ✅ Nouveau champ : Numéro compte bancaire -->
-    <label class="field">
-      <span>Numéro de compte bancaire</span>
-      <input formControlName="numCompteBancaire" [readonly]="!editMode()" maxlength="20"
-             [class.invalid]="editMode() && numCompteBancaire?.touched && numCompteBancaire?.invalid">
-      <small class="error" *ngIf="editMode() && numCompteBancaire?.touched && numCompteBancaire?.hasError('required')">
-        Numéro de compte bancaire requis.
-      </small>
-      <small class="error" *ngIf="editMode() && numCompteBancaire?.touched && numCompteBancaire?.hasError('pattern')">
-        Le numéro de compte doit contenir entre 10 et 20 chiffres.
-      </small>
-    </label>
+      <!-- <div class="rowitem">
+        <div><b>Numéro de compte bancaire</b></div>
+        <div>
+          <input formControlName="numCompteBancaire" maxlength="20"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && numCompteBancaire?.touched && numCompteBancaire?.invalid" />
+          <small class="error" *ngIf="editMode() && numCompteBancaire?.touched && numCompteBancaire?.hasError('required')">
+            Requis.
+          </small>
+          <small class="error" *ngIf="editMode() && numCompteBancaire?.touched && numCompteBancaire?.hasError('pattern')">
+            Entre 10 et 20 chiffres.
+          </small>
+        </div>
+      </div> -->
 
-    <div class="actions" *ngIf="editMode()">
-      <button class="btn btn-primary" type="submit" [disabled]="loading() || !editMode() || form.invalid">
-        {{ loading() ? 'Enregistrement…' : 'Enregistrer' }}
-      </button>
-      <button class="btn btn-ghost" type="button" (click)="toggleEdit()" [disabled]="loading()">
-        Annuler
+      <!-- ACTIONS -->
+      <div class="inline-actions" *ngIf="editMode()">
+        <button type="submit" [disabled]="loading() || form.invalid" class="btn success">
+          {{ loading() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+        <button type="button" class="ghost" (click)="toggleEdit()" [disabled]="loading()">
+          Annuler
+        </button>
+      </div>
+    </form>
+
+    <!-- MESSAGES -->
+    <div *ngIf="msg()" class="server-success">{{ msg() }}</div>
+    <div *ngIf="err()" class="server-error">{{ err() }}</div>
+    <div *ngIf="err() && err().includes('Session non valide')">
+      <button class="btn success" type="button" (click)="reconnect()">
+        Se reconnecter
       </button>
     </div>
-  </form>
-
-  <div *ngIf="msg()" class="server-success" style="margin-top:12px;">{{ msg() }}</div>
-  <div *ngIf="err()" class="server-error" style="margin-top:12px;">{{ err() }}</div>
-
-  <!-- ✅ Bouton de reconnexion en cas de problème de session -->
-  <div *ngIf="err() && err().includes('Session non valide')" style="margin-top:12px;">
-    <button class="btn btn-primary" type="button" (click)="reconnect()">
-      Se reconnecter
-    </button>
   </div>
 </div>

@@ -30,7 +30,7 @@ export interface LoginResponse {
   message: string;
 }
 
-// ✅ Fixed RegisterPayload to include new fields
+// ✅ CORRIGÉ: RegisterPayload sans numCompteBancaire
 export interface RegisterPayload {
   role: string;
   nom: string;
@@ -38,7 +38,6 @@ export interface RegisterPayload {
   email: string;
   password: string;
   numCin: string;
-  numCompteBancaire: string;
 }
 
 export interface RegisterResponse {
@@ -90,11 +89,11 @@ export class AuthService {
   login(payload: LoginRequest) {
     return this.http.post<LoginResponse>(`${this.api}/auth/login`, payload).pipe(
       tap(res => {
-        // ✅ Toujours stocker le token
+        //  Toujours stocker le token
         if (res.token) {
           localStorage.setItem('token', res.token);
         }
-        // ✅ Stocker user + role si renvoyés (évite d'appeler /users/me juste après)
+        //  Stocker user + role si renvoyés (évite d'appeler /users/me juste après)
         if (res.user) {
           localStorage.setItem('user', JSON.stringify(res.user));
           if (res.user.role) localStorage.setItem('role', res.user.role);
@@ -111,7 +110,6 @@ export class AuthService {
     );
   }
 
-  // ===== Logout =====
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');

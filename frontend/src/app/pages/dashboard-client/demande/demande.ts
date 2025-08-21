@@ -4,10 +4,10 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormControl, F
 import { ActivatedRoute, Router } from '@angular/router';
 import { DemandesService, Compte, DemandeChequier } from '../../../core/demande.service';
 import { AuthService } from '../../../core/auth.service';
+import { ToastrService } from 'ngx-toastr';       // ✅ Toastr
 
 @Component({
   standalone: true,
-  // ✅ Ajout de FormsModule pour ngModel
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './demande.html',
   styleUrls: ['./demande.css']
@@ -16,6 +16,8 @@ export class DemandeComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private api = inject(DemandesService);
+  private toastr = inject(ToastrService);         // ✅ Toastr
 
   comptes: Compte[] = [];
   demandes: DemandeChequier[] = [];
@@ -23,7 +25,6 @@ export class DemandeComponent implements OnInit {
 
   // Sélecteur de compte (Reactive)
   compteCtrl = new FormControl<number | null>(null);
-  // Pour le reste de l'UI
   compteIdSel = signal<number | null>(null);
   showModal = signal(false);
   errorMsg = signal<string | null>(null);
@@ -35,7 +36,7 @@ export class DemandeComponent implements OnInit {
 
   form!: FormGroup;
 
-  constructor(private fb: FormBuilder, private api: DemandesService) {
+  constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
       compteId: [null, Validators.required],
       dateDemande: ['', Validators.required],
@@ -58,7 +59,6 @@ export class DemandeComponent implements OnInit {
     const q = this.route.snapshot.queryParamMap.get('compteId');
     if (!preselectedId && q) preselectedId = Number(q);
 
-    // quand l'utilisateur change de compte dans le <select>
     this.compteCtrl.valueChanges.subscribe((id) => {
       this.compteIdSel.set(id ?? null);
       if (id != null) this.refresh(id);
@@ -67,12 +67,9 @@ export class DemandeComponent implements OnInit {
     this.loadComptes(preselectedId);
   }
 
-  // ✅ Méthode manquante ajoutée
   onSelectCompte(compteId: number | null) {
     this.compteIdSel.set(compteId);
-    if (compteId != null) {
-      this.refresh(compteId);
-    }
+    if (compteId != null) this.refresh(compteId);
   }
 
   private loadComptes(preselectedId?: number | null) {
@@ -91,12 +88,14 @@ export class DemandeComponent implements OnInit {
         }
 
         this.compteIdSel.set(chosen);
-        this.compteCtrl.setValue(chosen); // ✅ synchronise le select
+        this.compteCtrl.setValue(chosen); // ✅ sync select
 
         if (chosen != null) this.refresh(chosen); else this.loading = false;
       },
       error: (err) => {
-        this.errorMsg.set('Impossible de charger vos comptes: ' + err.message);
+        const msg = 'Impossible de charger vos comptes: ' + (err?.message ?? '');
+        this.errorMsg.set(msg);
+        this.toastr.error('Chargement des comptes impossible ❌');   // ✅ toast
         this.loading = false;
       }
     });
@@ -113,7 +112,9 @@ export class DemandeComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.errorMsg.set('Chargement des demandes échoué: ' + err.message);
+        const msg = 'Chargement des demandes échoué: ' + (err?.message ?? '');
+        this.errorMsg.set(msg);
+        this.toastr.error('Chargement des demandes échoué ❌');      // ✅ toast
         this.loading = false;
       }
     });
@@ -147,7 +148,8 @@ export class DemandeComponent implements OnInit {
 
   modifier(d: DemandeChequier) {
     if (d.statut !== 'EN_ATTENTE') {
-      this.errorMsg.set('Seules les demandes EN_ATTENTE peuvent être modifiées');
+      // this.errorMsg.set('Seules les demandes EN_ATTENTE peuvent être modifiées');
+      this.toastr.warning('Modification non autorisée (statut non EN_ATTENTE)'); // ✅ toast
       return;
     }
     const date = d.dateDemande ? this.toInputDate(d.dateDemande as any) : this.toInputDate(new Date());
@@ -172,11 +174,15 @@ export class DemandeComponent implements OnInit {
   }
 
   submit() {
-    if (this.form.invalid || this.submitting()) return;
+    if (this.form.invalid || this.submitting()) {
+      this.toastr.error('Formulaire invalide ❌');                   // ✅ toast
+      return;
+    }
 
     const cid = this.form.value.compteId as number | null;
     if (!cid) {
       this.errorMsg.set('Veuillez choisir un compte');
+      this.toastr.error('Veuillez choisir un compte ❌');            // ✅ toast
       return;
     }
 
@@ -194,18 +200,21 @@ export class DemandeComponent implements OnInit {
       this.api.modifierDemande(this.editingId()!, payload).subscribe({
         next: () => {
           this.successMsg.set('Demande modifiée avec succès');
+          this.toastr.success('Demande modifiée avec succès ✅');    // ✅ toast
           this.closeModal();
           this.refresh(cid);
         },
         error: (err) => {
-          this.errorMsg.set(err.message || 'Mise à jour impossible');
+          const msg = err?.message || 'Mise à jour impossible';
+          this.errorMsg.set(msg);
+          this.toastr.error('Mise à jour impossible ❌');            // ✅ toast
           this.submitting.set(false);
         }
       });
       return;
     }
 
-    // Création
+    // création
     const payload = {
       compteId: cid,
       dateDemande: this.form.value.dateDemande,
@@ -216,11 +225,14 @@ export class DemandeComponent implements OnInit {
     this.api.creerDemande(payload).subscribe({
       next: () => {
         this.successMsg.set('Demande créée avec succès');
+        this.toastr.success('Demande créée avec succès ✅');         // ✅ toast
         this.closeModal();
         this.refresh(cid);
       },
       error: (err) => {
-        this.errorMsg.set(err.message || 'Création impossible');
+        const msg = err?.message || 'Création impossible';
+        this.errorMsg.set(msg);
+        this.toastr.error('Création impossible ❌');                 // ✅ toast
         this.submitting.set(false);
       }
     });
@@ -228,15 +240,22 @@ export class DemandeComponent implements OnInit {
 
   annuler(d: DemandeChequier) {
     const cid = this.compteIdSel();
-    if (!cid || d.statut !== 'EN_ATTENTE') return;
+    if (!cid || d.statut !== 'EN_ATTENTE') {
+      this.toastr.warning('Annulation non autorisée');              // ✅ toast
+      return;
+    }
 
     this.errorMsg.set(null);
     this.api.annulerDemande(d.id).subscribe({
       next: () => {
         this.successMsg.set('Demande annulée');
+        this.toastr.info('Demande annulée ✋');                      // ✅ toast
         this.refresh(cid);
       },
-      error: (err) => this.errorMsg.set('Annulation impossible: ' + err.message)
+      error: (err) => {
+        this.errorMsg.set('Annulation impossible: ' + (err?.message ?? ''));
+        this.toastr.error('Annulation impossible ❌');               // ✅ toast
+      }
     });
   }
 
@@ -249,18 +268,22 @@ export class DemandeComponent implements OnInit {
     this.api.supprimerDemande(d.id).subscribe({
       next: () => {
         this.successMsg.set('Demande supprimée');
+        this.toastr.warning('Demande supprimée 🗑️');                // ✅ toast
         this.refresh(cid);
       },
-      error: (err) => this.errorMsg.set('Suppression impossible: ' + err.message)
+      error: (err) => {
+        this.errorMsg.set('Suppression impossible: ' + (err?.message ?? ''));
+        this.toastr.error('Suppression impossible ❌');             // ✅ toast
+      }
     });
   }
 
   badgeClass(s: string) {
     switch (s) {
       case 'EN_ATTENTE': return 'badge gray';
-      case 'APPROUVEE': return 'badge green';
-      case 'REJETEE': return 'badge red';
-      case 'ANNULEE': return 'badge dark';
+      case 'APPROUVEE':  return 'badge green';
+      case 'REJETEE':    return 'badge red';
+      case 'ANNULEE':    return 'badge dark';
       default: return 'badge';
     }
   }

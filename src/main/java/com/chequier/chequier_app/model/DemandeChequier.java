@@ -16,18 +16,26 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "demande_chequier")
+@Getter
+@Setter
+@NoArgsConstructor
 public class DemandeChequier {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)                 // <— relation
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "compte_id", nullable = false)
     private CompteBancaire compte;
 
-    @ManyToOne(fetch = FetchType.LAZY)                 // <— relation
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -45,25 +53,22 @@ public class DemandeChequier {
     private Instant updatedAt;
 
     @PrePersist
-    void prePersist() { createdAt = Instant.now(); updatedAt = createdAt; }
+    void prePersist() {
+        createdAt = Instant.now();
+        updatedAt = createdAt;
+    }
 
     @PreUpdate
-    void preUpdate() { updatedAt = Instant.now(); }
+    void preUpdate() {
+        updatedAt = Instant.now();
+    }
 
-    // --- getters & setters
-    public Long getId() { return id; }
-    public CompteBancaire getCompte() { return compte; }
-    public void setCompte(CompteBancaire compte) { this.compte = compte; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public LocalDate getDateDemande() { return dateDemande; }
-    public void setDateDemande(LocalDate dateDemande) { this.dateDemande = dateDemande; }
-    public Integer getPages() { return pages; }
-    public void setPages(Integer pages) { this.pages = pages; }
-    public String getMotif() { return motif; }
-    public void setMotif(String motif) { this.motif = motif; }
-    public DemandeStatut getStatut() { return statut; }
-    public void setStatut(DemandeStatut statut) { this.statut = statut; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
+    public DemandeChequier(CompteBancaire compte, User user,
+                           LocalDate dateDemande, Integer pages, String motif) {
+        this.compte = compte;
+        this.user = user;
+        this.dateDemande = dateDemande;
+        this.pages = pages;
+        this.motif = motif;
+    }
 }

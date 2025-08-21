@@ -1,36 +1,98 @@
-<div class="card">
-  <div class="head">
-    <h1>Mon profil</h1>
-    <button class="btn btn-ghost" type="button" (click)="toggleEdit()">
-      {{ editMode() ? 'Annuler' : 'Modifier' }}
-    </button>
-  </div>
+<div class="wrap">
+  <h2>👤 Mon Profil (Agent)</h2>
 
-  <form class="profile-grid" [formGroup]="form" (ngSubmit)="save()">
-    <label class="field"><span>Email</span><input formControlName="email" [readonly]="!editMode()"></label>
-    <label class="field"><span>Nom</span><input formControlName="nom" [readonly]="!editMode()"></label>
-    <label class="field"><span>Prénom</span><input formControlName="prenom" [readonly]="!editMode()"></label>
-  <!-- ✅ Nouveau champ : Numéro CIN -->
-    <label class="field">
-      <span>Numéro CIN</span>
-      <input formControlName="numCin" [readonly]="!editMode()" maxlength="8"
-             [class.invalid]="editMode() && numCin?.touched && numCin?.invalid">
-      <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('required')">
-        Numéro CIN requis.
-      </small>
-      <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('pattern')">
-        Le CIN doit contenir exactement 8 chiffres.
-      </small>
-    </label>
-
-    <div class="actions" *ngIf="editMode()">
-      <button class="btn btn-primary" type="submit" [disabled]="loading() || !editMode()">
-        {{ loading() ? 'Enregistrement…' : 'Enregistrer' }}
-      </button>
-      <button class="btn btn-ghost" type="button" (click)="toggleEdit()" [disabled]="loading()">Annuler</button>
+  <div class="card">
+    <!-- HEADER -->
+    <div class="thead">
+      <div>Détails</div>
+      <div class="thead-actions">
+        <button class="btn-add" type="button" (click)="toggleEdit()">
+          {{ editMode() ? 'Annuler' : 'Modifier' }}
+        </button>
+      </div>
     </div>
-  </form>
 
-  <div *ngIf="msg()" class="server-success" style="margin-top:12px;">{{ msg() }}</div>
-  <div *ngIf="err()" class="server-error" style="margin-top:12px;">{{ err() }}</div>
+    <!-- FORMULAIRE PROFIL -->
+    <form class="inline-form profile-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="rowitem">
+        <div><b>Email</b></div>
+        <div>
+          <input formControlName="email"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && email?.touched && email?.invalid" />
+          <small class="error" *ngIf="editMode() && email?.touched && email?.hasError('required')">
+            Email requis.
+          </small>
+          <small class="error" *ngIf="editMode() && email?.touched && email?.hasError('email')">
+            Format invalide.
+          </small>
+        </div>
+      </div>
+
+      <div class="rowitem">
+        <div><b>Nom</b></div>
+        <div>
+          <input formControlName="nom"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && nom?.touched && nom?.invalid" />
+          <small class="error" *ngIf="editMode() && nom?.touched && nom?.invalid">
+            Nom requis.
+          </small>
+        </div>
+      </div>
+
+      <div class="rowitem">
+        <div><b>Prénom</b></div>
+        <div>
+          <input formControlName="prenom"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && prenom?.touched && prenom?.invalid" />
+          <small class="error" *ngIf="editMode() && prenom?.touched && prenom?.invalid">
+            Prénom requis.
+          </small>
+        </div>
+      </div>
+
+      <div class="rowitem">
+        <div><b>Numéro CIN</b></div>
+        <div>
+          <input formControlName="numCin" maxlength="8"
+                 [readonly]="!editMode()"
+                 [class.invalid]="editMode() && numCin?.touched && numCin?.invalid" />
+          <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('required')">
+            CIN requis.
+          </small>
+          <small class="error" *ngIf="editMode() && numCin?.touched && numCin?.hasError('pattern')">
+            Doit contenir 8 chiffres.
+          </small>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="inline-actions" *ngIf="editMode()">
+        <!-- important: bouton clickable même si form invalide -> save() affiche le toast d'erreur -->
+        <button
+          type="button"
+          class="btn success"
+          (click)="save()"
+          [disabled]="loading()"
+        >
+          {{ loading() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+
+        <button type="button" class="ghost" (click)="toggleEdit()" [disabled]="loading()">
+          Annuler
+        </button>
+      </div>
+    </form>
+
+    <!-- MESSAGES -->
+    <div *ngIf="msg()" class="server-success">{{ msg() }}</div>
+    <div *ngIf="err()" class="server-error">{{ err() }}</div>
+    <div *ngIf="err() && err().includes('Session non valide')">
+      <button class="btn success" type="button" (click)="reconnect()">
+        Se reconnecter
+      </button>
+    </div>
+  </div>
 </div>

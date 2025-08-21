@@ -5,5 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface HistoriqueRepository extends JpaRepository<Historique, Long> {
-  List<Historique> findTop100ByActeurIdOrderByCreeLeDesc(Long acteurId);
+    List<Historique> findTop100ByActeur_IdOrderByCreeLeDesc(Long acteurId);
+    List<Historique> findByDemande_IdOrderByCreeLeDesc(Long demandeId);
+    List<Historique> findByCompte_IdOrderByCreeLeDesc(Long compteId);
 }

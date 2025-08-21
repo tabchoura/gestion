@@ -3,6 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
+import { ToastrService } from 'ngx-toastr';
+
+type ProfileForm = {
+  email: string;
+  nom: string;
+  prenom: string;
+  numCin: string;
+};
 
 @Component({
   selector: 'app-profileagent',
@@ -15,6 +23,7 @@ export class ProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toastr = inject(ToastrService);
 
   editMode = signal(false);
   loading  = signal(false);
@@ -22,6 +31,14 @@ export class ProfileComponent implements OnInit {
   err      = signal('');
 
   private previousEmail = '';
+  private original: ProfileForm | null = null;
+
+  private readonly labels: Record<keyof ProfileForm, string> = {
+    email: 'Email',
+    nom: 'Nom',
+    prenom: 'Prénom',
+    numCin: 'CIN',
+  };
 
   form = this.fb.group({
     email:  ['', [Validators.required, Validators.email]],
@@ -31,20 +48,37 @@ export class ProfileComponent implements OnInit {
   });
 
   ngOnInit() { this.load(); }
-  toggleEdit() { this.editMode.update(v => !v); }
 
-  // ✅ Getter pour accéder au contrôle numCin
+  toggleEdit() {
+    const newVal = !this.editMode();
+    this.editMode.set(newVal);
+    if (!newVal && this.original) {
+      this.form.patchValue(this.original);
+      this.form.markAsPristine();
+      this.form.updateValueAndValidity({ onlySelf: false, emitEvent: false });
+    }
+  }
+
+  get email()  { return this.form.get('email'); }
+  get nom()    { return this.form.get('nom'); }
+  get prenom() { return this.form.get('prenom'); }
   get numCin() { return this.form.get('numCin'); }
 
   private extractUser(res: any) {
-    return (res?.user ?? res) as { 
-      id: number; 
-      nom: string; 
-      prenom: string; 
-      email: string; 
+    return (res?.user ?? res) as {
+      id: number;
+      nom: string;
+      prenom: string;
+      email: string;
       role: string;
       numCin: string;
     };
+  }
+
+  private snapshot(patch: ProfileForm) {
+    this.original = { ...patch };
+    this.form.markAsPristine();
+    this.form.updateValueAndValidity({ onlySelf: false, emitEvent: false });
   }
 
   load() {
@@ -54,54 +88,90 @@ export class ProfileComponent implements OnInit {
       next: (res) => {
         const u = this.extractUser(res);
         this.previousEmail = u.email;
-        this.form.patchValue({ 
-          email: u.email, 
-          nom: u.nom, 
+        const patch: ProfileForm = {
+          email: u.email,
+          nom: u.nom,
           prenom: u.prenom,
-          numCin: u.numCin
-        });
+          numCin: u.numCin,
+        };
+        this.form.patchValue(patch);
+        this.snapshot(patch);
         this.loading.set(false);
       },
       error: (e) => {
         this.loading.set(false);
         if (e?.status === 401) {
-          // ❌ Ne pas logout ici
           this.err.set('Session non valide pour /users/me. Vous pouvez vous reconnecter.');
-          // Optionnel: afficher un bouton de reconnexion (voir template)
+          this.toastr.warning('Session expirée. Veuillez vous reconnecter.');
         } else {
           this.err.set('Erreur lors du chargement du profil.');
+          this.toastr.error('Erreur lors du chargement du profil.');
         }
       }
     });
   }
 
+  private getChangedKeys(current: ProfileForm): (keyof ProfileForm)[] {
+    const base = this.original ?? current;
+    const keys = Object.keys(current) as (keyof ProfileForm)[];
+    return keys.filter(k => (current[k] ?? '') !== (base[k] ?? ''));
+  }
+
   save() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.toastr.error('Formulaire invalide. Vérifiez les champs.');
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const current = this.form.getRawValue() as ProfileForm;
+    const base = this.original ?? current;
+    const changed = this.getChangedKeys(current);
+
+    if (changed.length === 0) {
+      this.toastr.info('Aucune modification détectée.');
+      return;
+    }
+
     this.loading.set(true);
     this.msg.set(''); this.err.set('');
 
-    const emailChanged = this.form.value.email !== this.previousEmail;
+    const emailChanged = current.email !== this.previousEmail;
 
-    this.auth.updateProfile(this.form.value as any).subscribe({
+    this.auth.updateProfile(current as any).subscribe({
       next: () => {
         this.loading.set(false);
-        this.msg.set('Profil mis à jour.');
-        this.toggleEdit();
+        // this.msg.set('Profil mis à jour.');
+        this.editMode.set(false);
+
+        changed.forEach((k) => {
+          const before = (base[k] ?? '').toString();
+          const after  = (current[k] ?? '').toString();
+          const valueLine = k === 'email'
+            ? `${before} → ${after}`
+            : `${before || '—'} → ${after || '—'}`;
+          this.toastr.success(`le profil a été  mis à jour avec succèes`);
+        });
+
         if (emailChanged) {
+          this.toastr.warning(
+            'Votre email a changé. Veuillez vous reconnecter.',
+            'Reconnectez-vous'
+          );
           this.msg.set('Profil mis à jour. Veuillez vous reconnecter suite au changement d\'email.');
-          // Proposer la reconnexion, sans forcer immédiatement
         } else {
           this.load();
         }
       },
       error: (e) => {
         this.loading.set(false);
-        this.err.set(e?.error?.message || 'Mise à jour impossible.');
+        const message = e?.error?.message || 'Mise à jour impossible.';
+        this.err.set(message);
+        this.toastr.error(message, 'Erreur');
       }
     });
   }
 
-  // Bouton dans le template pour forcer la reconnexion propre
   reconnect() {
     this.auth.logout();
     this.router.navigateByUrl('/login');
