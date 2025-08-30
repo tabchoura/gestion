@@ -74,23 +74,24 @@ export class DemandesService {
 
   /* ---- Comptes ---- */
   getMesComptes(): Observable<Compte[]> {
+    // Changed from /comptes to /comptes/mine
     return this.http
-      .get<Compte[]>(`${this.api}/comptes`, { headers: this.getHttpHeaders() })
+      .get<Compte[]>(`${this.api}/comptes/mine`, { headers: this.getHttpHeaders() })
       .pipe(catchError(this.handleError));
   }
 
-  /* ---- Demandes (client) ---- */
-  getMesDemandes(): Observable<DemandeChequier[]> {
-    return this.http
-      .get<DemandeChequier[]>(`${this.api}/demandes`, { headers: this.getHttpHeaders() })
-      .pipe(catchError(this.handleError));
-  }
+ getDemandesByCompte(compteId: number): Observable<DemandeChequier[]> {
+  return this.http
+    .get<DemandeChequier[]>(`${this.api}/demandes/mine?compteId=${compteId}`, { headers: this.getHttpHeaders() })
+    .pipe(catchError(this.handleError));
+}
 
-  getDemandesByCompte(compteId: number): Observable<DemandeChequier[]> {
-    return this.http
-      .get<DemandeChequier[]>(`${this.api}/demandes?compteId=${compteId}`, { headers: this.getHttpHeaders() })
-      .pipe(catchError(this.handleError));
-  }
+// Also, update getMesDemandes to use the correct endpoint:
+getMesDemandes(): Observable<DemandeChequier[]> {
+  return this.http
+    .get<DemandeChequier[]>(`${this.api}/demandes/mine`, { headers: this.getHttpHeaders() })
+    .pipe(catchError(this.handleError));
+}
 
   creerDemande(payload: CreateDemandePayload): Observable<DemandeChequier> {
     return this.http

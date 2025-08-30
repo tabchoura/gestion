@@ -29,7 +29,7 @@ public class CompteController {
     private final CompteService compteService;
     public CompteController(CompteService compteService) { this.compteService = compteService; }
 
-    @GetMapping({"/mine"})
+    @GetMapping("/mine")
     public ResponseEntity<List<CompteResponse>> list(Authentication auth) {
         var out = compteService.list(auth);
         return ResponseEntity.ok(out);

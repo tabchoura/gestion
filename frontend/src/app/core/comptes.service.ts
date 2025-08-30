@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 export interface CompteBancaire {
   id?: number;
-  typeCompte: string; // ✅ Remplace banque + titulaire
+  typeCompte: string;
   numeroCompte: string;
   rib?: string | null;
   iban?: string | null;
@@ -20,7 +20,8 @@ export class ComptesService {
 
   /** Liste tous les comptes */
   list(): Observable<CompteBancaire[]> {
-    return this.http.get<CompteBancaire[]>(this.base, { headers: this.getHeaders() });
+    // Changed from this.base to this.base + '/mine'
+    return this.http.get<CompteBancaire[]>(`${this.base}/mine`, { headers: this.getHeaders() });
   }
 
   /** Crée un nouveau compte */
