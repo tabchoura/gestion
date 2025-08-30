@@ -137,7 +137,7 @@ export class ProfileComponent implements OnInit {
     this.msg.set(''); this.err.set('');
 
     const emailChanged = current.email !== this.previousEmail;
-
+//put
     this.auth.updateProfile(current as any).subscribe({
       next: () => {
         this.loading.set(false);

@@ -9,7 +9,7 @@ export interface Historique {
   acteurEmail: string;
   acteurRole?: string;
   action: string;
-  creeLe: string;             // ISO date string
+  creeLe: string;            
   message?: string;
   payloadJson?: string;
   ressourceId?: number | string;
@@ -33,7 +33,6 @@ export class HistoriqueService {
   private http = inject(HttpClient);
   private readonly api = environment.apiUrl.replace(/\/+$/, '') + '/historique';
 
-  /** Construit les headers. Ajoute Authorization seulement si token présent. */
   private buildHeaders(json = false): HttpHeaders {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     let headers = new HttpHeaders({ 'Accept': 'application/json' });

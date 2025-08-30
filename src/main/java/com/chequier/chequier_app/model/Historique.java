@@ -40,7 +40,6 @@ public class Historique {
   @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
   private CompteBancaire compte;
 
-  // copies audit (facultatif mais utile)
   @Column(nullable = false) private String acteurEmail;
   private String acteurRole;
 
@@ -56,7 +55,6 @@ public class Historique {
     }
   }
 
-  // constructeur pratique
   public Historique(String action, String message, String page,
                     String ressourceType, String ressourceLabel, String ressourceId,
                     User acteur, DemandeChequier demande, CompteBancaire compte) {

@@ -1,8 +1,7 @@
-// src/app/core/chequiers.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../environments/environment.development'; // <--- ici
+import { environment } from '../../environments/environment.development'; 
 
 export interface Chequier {
   id: number;
@@ -17,7 +16,7 @@ export interface Chequier {
 @Injectable({ providedIn: 'root' })
 export class ChequiersService {
   private http = inject(HttpClient);
-private base = `${environment.apiUrl}/api/chequiers`; // <-- /api ajouté
+private base = `${environment.apiUrl}/api/chequiers`; 
 
 listByCompte(compteId: number): Promise<Chequier[]> {
   return firstValueFrom(

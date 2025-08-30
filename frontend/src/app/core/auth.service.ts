@@ -5,7 +5,6 @@ import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment.development';
 
-// ===== Types =====
 export interface User {
   id: number;
   nom: string;
@@ -30,7 +29,6 @@ export interface LoginResponse {
   message: string;
 }
 
-// ✅ CORRIGÉ: RegisterPayload sans numCompteBancaire
 export interface RegisterPayload {
   role: string;
   nom: string;
